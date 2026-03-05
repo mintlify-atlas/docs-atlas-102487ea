@@ -1,0 +1,87 @@
+{
+  "projectType": "frontend",
+  "projectName": "MYMUSICK",
+  "projectDescription": "A web-based music streaming application that lets users search and play music using YouTube integration with dynamic color theming.",
+  "theme": "almond",
+  "primaryColor": "#04CDA8",
+  "lightColor": "#e8ff47",
+  "darkColor": "#FF5757",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/music-search",
+              "features/youtube-player",
+              "features/dynamic-theming",
+              "features/responsive-design"
+            ]
+          },
+          {
+            "group": "Styling",
+            "pages": [
+              "styling/themes",
+              "styling/color-system",
+              "styling/typography"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/setup",
+              "development/architecture",
+              "development/customization"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Backend API",
+            "pages": [
+              "api/search-endpoint",
+              "api/response-format"
+            ]
+          },
+          {
+            "group": "JavaScript API",
+            "pages": [
+              "api/player-functions",
+              "api/color-detection",
+              "api/render-functions"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Music search powered by backend API integration",
+    "YouTube iframe player with play/pause controls",
+    "Dynamic color extraction from album artwork",
+    "Responsive sidebar navigation for playlists",
+    "Three distinct CSS theme variations",
+    "Login modal with authentication UI"
+  ],
+  "publicApiSurface": [
+    "GET /search?q={query} - Search endpoint at mymusick-backend.onrender.com",
+    "renderSongs(songs) - Render search results to DOM",
+    "loadSong(song) - Load and play a song in the YouTube player",
+    "detectarColor(imgURL, element) - Extract dominant color from album art",
+    "togglePlayPause() - Toggle play/pause state",
+    "onYouTubeIframeAPIReady() - YouTube API initialization callback",
+    "onPlayerStateChange(event) - Handle YouTube player state changes"
+  ]
+}
