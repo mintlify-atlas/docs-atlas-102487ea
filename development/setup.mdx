@@ -1,0 +1,188 @@
+---
+title: Development Setup
+description: Get your development environment ready for MYMUSICK
+icon: "wrench"
+---
+
+## Quick Start
+
+MYMUSICK is a lightweight music streaming web application built with vanilla JavaScript, HTML5, and CSS3. No build tools or package managers required—just clone and serve.
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone <your-repo-url>
+    cd mymusick
+    ```
+  </Step>
+
+  <Step title="Start a local server">
+    You can use any static file server:
+
+    <CodeGroup>
+      ```bash Python
+      python -m http.server 8000
+      ```
+
+      ```bash Node.js
+      npx serve .
+      ```
+
+      ```bash PHP
+      php -S localhost:8000
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Open in browser">
+    Navigate to `http://localhost:8000` and you're ready to develop!
+  </Step>
+</Steps>
+
+## Project Structure
+
+MYMUSICK follows a simple, flat file structure:
+
+```
+mymusick/
+├── index.html              # Main application entry point
+├── estilooriginal.css      # Original theme stylesheet
+├── estiloformal2.css       # Alternative formal theme
+├── img/
+│   └── Logo.png           # Application logo
+└── fonts/
+    └── gyanko-regular.otf # Custom Gyanko font
+```
+
+### Core Files
+
+<CardGroup cols={2}>
+  <Card title="index.html" icon="code">
+    Contains the complete application including HTML structure, embedded JavaScript logic, and YouTube API integration.
+  </Card>
+  
+  <Card title="estilooriginal.css" icon="palette">
+    Original theme with vibrant colors (`--primary: #04CDA8`, `--accent: #FF5757`) and Gyanko font.
+  </Card>
+  
+  <Card title="estiloformal2.css" icon="brush">
+    Modern dark theme with late-night vinyl lounge aesthetic using Bebas Neue and DM Sans fonts.
+  </Card>
+</CardGroup>
+
+## Dependencies
+
+### External Resources
+
+MYMUSICK has minimal external dependencies:
+
+1. **YouTube IFrame API** (loaded via CDN)
+   ```html
+   <script src="https://www.youtube.com/iframe_api"></script>
+   ```
+   Used for audio playback through YouTube's embedded player.
+
+2. **Backend API** (required)
+   ```javascript
+   https://mymusick-backend.onrender.com/search?q=<query>
+   ```
+   Backend service for music search functionality.
+
+3. **Google Fonts** (estiloformal2.css only)
+   ```css
+   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans...');
+   ```
+
+<Warning>
+  The backend API at `mymusick-backend.onrender.com` must be running for search functionality to work. Make sure you have access to this service or set up your own backend.
+</Warning>
+
+## Browser Requirements
+
+MYMUSICK uses modern web APIs and requires:
+
+- **Canvas API** for dominant color detection (index.html:71)
+- **Dialog Element** for login modal (index.html:73-80)
+- **Fetch API** for backend communication (index.html:122-124)
+- **YouTube IFrame API** for audio playback
+- **CSS Custom Properties** for theming
+
+### Supported Browsers
+
+<CardGroup cols={3}>
+  <Card title="Chrome/Edge" icon="chrome">
+    Version 88+
+  </Card>
+  <Card title="Firefox" icon="firefox">
+    Version 98+
+  </Card>
+  <Card title="Safari" icon="safari">
+    Version 15.4+
+  </Card>
+</CardGroup>
+
+## Development Workflow
+
+### Hot Reload Setup
+
+For a better development experience with auto-reload:
+
+```bash
+# Using browser-sync
+npx browser-sync start --server --files "*.html, *.css, *.js"
+
+# Using live-server
+npx live-server --port=8000
+```
+
+### Debugging
+
+<Steps>
+  <Step title="Enable verbose logging">
+    Open browser DevTools (F12) and monitor:
+    - **Console** for JavaScript errors
+    - **Network** tab for API calls to backend
+    - **Elements** tab for DOM inspection
+  </Step>
+
+  <Step title="Test YouTube API integration">
+    Check if `window.YT` object is available:
+    ```javascript
+    console.log(window.YT); // Should show YouTube API object
+    ```
+  </Step>
+
+  <Step title="Verify backend connection">
+    Test the search endpoint:
+    ```bash
+    curl "https://mymusick-backend.onrender.com/search?q=test"
+    ```
+  </Step>
+</Steps>
+
+## Environment Variables
+
+Currently, the backend URL is hardcoded. To make it configurable:
+
+```javascript
+// Add to index.html <script> section
+const API_BASE_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000'
+  : 'https://mymusick-backend.onrender.com';
+
+// Update search function
+const res = await fetch(
+  `${API_BASE_URL}/search?q=${encodeURIComponent(query)}`
+);
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Architecture" icon="sitemap" href="/development/architecture">
+    Learn about the application structure and data flow
+  </Card>
+  <Card title="Customization" icon="palette" href="/development/customization">
+    Customize themes, add features, and extend functionality
+  </Card>
+</CardGroup>

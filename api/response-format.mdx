@@ -1,0 +1,281 @@
+---
+title: 'Response Format'
+description: 'Understanding the song object structure returned by the API'
+icon: 'code'
+---
+
+## Overview
+
+The MYMUSICK backend API returns song data as an array of song objects. Each object contains essential information needed to display and play songs in the application.
+
+## Response Structure
+
+The API returns a JSON array containing zero or more song objects:
+
+```json
+[
+  {
+    "id": "string",
+    "title": "string",
+    "artist": "string",
+    "thumbnail": "string (URL)"
+  }
+]
+```
+
+## Song Object Schema
+
+Each song object in the response array contains the following fields:
+
+<ResponseField name="id" type="string" required>
+  The unique YouTube video ID for the song. This is used to load and play the song using the YouTube IFrame API.
+  
+  **Example**: `"JGwWNGJdvx8"`
+</ResponseField>
+
+<ResponseField name="title" type="string" required>
+  The title of the song or video.
+  
+  **Example**: `"Shape of You"`
+</ResponseField>
+
+<ResponseField name="artist" type="string" required>
+  The artist or channel name associated with the song.
+  
+  **Example**: `"Ed Sheeran"`
+</ResponseField>
+
+<ResponseField name="thumbnail" type="string" required>
+  A URL pointing to the thumbnail image for the song. Typically from YouTube's image CDN.
+  
+  **Example**: `"https://i.ytimg.com/vi/JGwWNGJdvx8/mqdefault.jpg"`
+</ResponseField>
+
+## Example Responses
+
+### Multiple Results
+
+```json
+[
+  {
+    "id": "JGwWNGJdvx8",
+    "title": "Shape of You",
+    "artist": "Ed Sheeran",
+    "thumbnail": "https://i.ytimg.com/vi/JGwWNGJdvx8/mqdefault.jpg"
+  },
+  {
+    "id": "2Vv-BfVoq4g",
+    "title": "Perfect",
+    "artist": "Ed Sheeran",
+    "thumbnail": "https://i.ytimg.com/vi/2Vv-BfVoq4g/mqdefault.jpg"
+  },
+  {
+    "id": "lp-EO5I60KA",
+    "title": "Thinking Out Loud",
+    "artist": "Ed Sheeran",
+    "thumbnail": "https://i.ytimg.com/vi/lp-EO5I60KA/mqdefault.jpg"
+  }
+]
+```
+
+### Single Result
+
+```json
+[
+  {
+    "id": "3tmd-ClpJxA",
+    "title": "Bohemian Rhapsody",
+    "artist": "Queen",
+    "thumbnail": "https://i.ytimg.com/vi/3tmd-ClpJxA/mqdefault.jpg"
+  }
+]
+```
+
+### No Results
+
+```json
+[]
+```
+
+## Working with Song Objects
+
+### Rendering Songs in UI
+
+From the main application (index.html:139-172):
+
+```javascript
+function renderSongs(songs) {
+  results.innerHTML = "";
+
+  if (!songs?.length) {
+    results.innerHTML = `<p>No se encontraron resultados</p>`;
+    return;
+  }
+
+  songs.forEach(song => {
+    const div = document.createElement("div");
+    div.className = "song";
+    div.tabIndex = 0;
+
+    div.innerHTML = `
+      <img src="${song.thumbnail}" 
+           alt="Portada de ${song.title}"
+           loading="lazy"
+           crossorigin="anonymous">
+      <div class="song-info">
+        <strong>${song.title}</strong>
+        <small>${song.artist}</small>
+      </div>
+    `;
+
+    div.addEventListener("click", () => loadSong(song));
+    results.appendChild(div);
+  });
+}
+```
+
+### Playing Songs
+
+The `id` field is used to load songs in the YouTube player (index.html:215-222):
+
+```javascript
+function loadSong(song) {
+  if (!player) return;
+
+  nowPlayingText.textContent = `${song.title} - ${song.artist}`;
+
+  player.loadVideoById(song.id);
+  player.playVideo();
+}
+```
+
+## Data Types and Validation
+
+<CodeGroup>
+
+```typescript TypeScript Interface
+interface Song {
+  id: string;           // YouTube video ID
+  title: string;        // Song title
+  artist: string;       // Artist name
+  thumbnail: string;    // Thumbnail URL
+}
+
+type SearchResponse = Song[];
+```
+
+```javascript JavaScript Validation
+function isValidSong(song) {
+  return (
+    typeof song === 'object' &&
+    typeof song.id === 'string' &&
+    typeof song.title === 'string' &&
+    typeof song.artist === 'string' &&
+    typeof song.thumbnail === 'string' &&
+    song.thumbnail.startsWith('http')
+  );
+}
+
+function validateResponse(songs) {
+  if (!Array.isArray(songs)) {
+    throw new Error('Response must be an array');
+  }
+  
+  return songs.every(isValidSong);
+}
+```
+
+</CodeGroup>
+
+## Field Details
+
+### YouTube Video ID
+
+The `id` field contains the unique YouTube video identifier:
+
+- **Format**: 11-character alphanumeric string
+- **Usage**: Load videos using YouTube IFrame API
+- **Example**: `JGwWNGJdvx8`
+
+```javascript
+// Using the ID with YouTube API
+player.loadVideoById(song.id);
+
+// Constructing YouTube URL
+const videoUrl = `https://www.youtube.com/watch?v=${song.id}`;
+```
+
+### Thumbnail URLs
+
+Thumbnail URLs follow YouTube's image CDN pattern:
+
+- **Host**: `i.ytimg.com`
+- **Format**: `/vi/{VIDEO_ID}/{QUALITY}.jpg`
+- **Common qualities**: `default.jpg`, `mqdefault.jpg`, `hqdefault.jpg`, `maxresdefault.jpg`
+
+<Tip>
+  When displaying thumbnails in your UI, use the `loading="lazy"` attribute for better performance and `crossorigin="anonymous"` if you need to process the image data with canvas.
+</Tip>
+
+## Error Handling
+
+### Handling Empty Arrays
+
+```javascript
+const songs = await response.json();
+
+if (!songs?.length) {
+  // No results found
+  console.log('No songs found for this query');
+  return;
+}
+
+// Process songs
+songs.forEach(song => {
+  console.log(`${song.title} by ${song.artist}`);
+});
+```
+
+### Validating Response Data
+
+```javascript
+const songs = await response.json();
+
+if (!Array.isArray(songs)) {
+  throw new Error('Invalid response format: expected array');
+}
+
+for (const song of songs) {
+  if (!song.id || !song.title || !song.artist || !song.thumbnail) {
+    console.warn('Incomplete song object:', song);
+    continue;
+  }
+  
+  // Process valid song
+}
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Type Safety" icon="shield-check">
+    Validate the response structure and field types before using the data in your application.
+  </Card>
+  
+  <Card title="Null Checks" icon="circle-exclamation">
+    Use optional chaining (`?.`) when accessing array properties to prevent runtime errors.
+  </Card>
+  
+  <Card title="Image Loading" icon="image">
+    Implement lazy loading for thumbnails to improve page performance.
+  </Card>
+  
+  <Card title="Accessibility" icon="universal-access">
+    Always provide meaningful alt text when displaying thumbnails.
+  </Card>
+</CardGroup>
+
+## See Also
+
+- [Search Endpoint](/api/search-endpoint) - Learn how to query the API
+- [Integration Guide](/integration) - Complete integration walkthrough

@@ -1,80 +1,221 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: 'Quick Start'
+description: 'Get MYMUSICK up and running in under 5 minutes'
+icon: 'rocket'
 ---
 
-## Get started in three steps
+## Get Started with MYMUSICK
 
-Get your documentation site running locally and make your first customization.
+This guide will walk you through setting up MYMUSICK locally and making your first music search.
 
-### Step 1: Set up your local environment
+<Steps>
+  <Step title="Clone or Download the Repository">
+    Download the MYMUSICK source code to your local machine:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    # Clone the repository (if using git)
+    git clone <repository-url>
+    cd mymusick
 
-### Step 2: Deploy your changes
+    # Or download and extract the ZIP file
+    ```
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    <Note>
+      MYMUSICK is a client-side web application - no build process or installation required!
+    </Note>
+  </Step>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Step title="Understand the File Structure">
+    The MYMUSICK project has a simple, organized structure:
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```
+    mymusick/
+    ├── index.html              # Main application file
+    ├── estilooriginal.css      # Core styling and theme
+    ├── img/
+    │   └── Logo.png           # Application logo
+    └── fonts/
+        └── gyanko-regular.otf # Custom Gyanko font
+    ```
 
-### Step 3: Go live
+    **Key Files:**
+    - `index.html` - Contains all the HTML structure, JavaScript logic, and player functionality
+    - `estilooriginal.css` - Defines the color system, layout, and responsive design
+    - `img/Logo.png` - The MYMUSICK logo displayed in the header
+  </Step>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+  <Step title="Open in Your Browser">
+    Simply open the `index.html` file in your web browser:
 
-## Next steps
+    <CodeGroup>
+      ```bash macOS
+      open index.html
+      ```
 
-Now that you have your docs running, explore these key features:
+      ```bash Linux
+      xdg-open index.html
+      ```
+
+      ```bash Windows
+      start index.html
+      ```
+
+      ```bash Python Server
+      # For a local development server
+      python -m http.server 8000
+      # Then visit: http://localhost:8000
+      ```
+    </CodeGroup>
+
+    <Note>
+      For the best experience, use a modern browser like Chrome, Firefox, or Edge with JavaScript enabled.
+    </Note>
+  </Step>
+
+  <Step title="Make Your First Search">
+    Now you're ready to search for music!
+
+    1. **Enter a search query** in the search bar (e.g., "Bohemian Rhapsody")
+    2. **Press Enter** to search
+    3. **Click any song card** to start playing
+
+    The search uses the MYMUSICK backend API:
+
+    ```javascript
+    const res = await fetch(
+      `https://mymusick-backend.onrender.com/search?q=${encodeURIComponent(query)}`
+    );
+    const songs = await res.json();
+    ```
+
+    Each result includes:
+    - Song title and artist
+    - Thumbnail image
+    - YouTube video ID for playback
+  </Step>
+</Steps>
+
+---
+
+## How It Works
+
+### Search Functionality
+
+The search is triggered when you press Enter in the search input:
+
+```javascript index.html
+input.addEventListener("keydown", async (e) => {
+  if (e.key !== "Enter") return;
+
+  const query = input.value.trim();
+  if (!query) return;
+
+  results.innerHTML = `<p>Buscando... 🎵</p>`;
+
+  try {
+    const res = await fetch(
+      `https://mymusick-backend.onrender.com/search?q=${encodeURIComponent(query)}`
+    );
+    if (!res.ok) throw new Error();
+    const songs = await res.json();
+    renderSongs(songs);
+  } catch {
+    results.innerHTML = `<p>Error al buscar 😕</p>`;
+  }
+});
+```
+
+### Dynamic Theming
+
+MYMUSICK detects the dominant color from each song's thumbnail and applies it as a hover effect:
+
+```javascript index.html
+function detectarColor(imgURL, element) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = imgURL;
+
+  img.onload = () => {
+    canvas.width = img.width / 4;
+    canvas.height = img.height / 4;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    // ... color detection algorithm
+    element.style.background = `rgba(${dominant}, 0.35)`;
+  };
+}
+```
+
+### YouTube Player Integration
+
+Songs play using the YouTube IFrame API:
+
+```javascript index.html
+function loadSong(song) {
+  if (!player) return;
+  
+  nowPlayingText.textContent = `${song.title} - ${song.artist}`;
+  player.loadVideoById(song.id);
+  player.playVideo();
+}
+```
+
+---
+
+## Color System
+
+MYMUSICK uses a vibrant color palette defined in CSS variables:
+
+```css estilooriginal.css
+:root {
+  --primary: #04CDA8;    /* Turquoise - header & player */
+  --accent: #FF5757;     /* Red - buttons & highlights */
+  --bg-dark: #111;       /* Dark - sidebar & cards */
+  --text-light: white;   /* White - text */
+}
+```
+
+These colors create a modern, high-contrast design that's perfect for a music application.
+
+---
+
+## Next Steps
 
 <CardGroup cols={2}>
+  <Card
+    title="Explore the Architecture"
+    icon="diagram-project"
+    href="/development/architecture"
+  >
+    Learn how MYMUSICK's components work together
+  </Card>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+  <Card
+    title="Customize the Design"
+    icon="paintbrush"
+    href="/development/customization"
+  >
+    Modify colors, fonts, and layout to match your style
+  </Card>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api/search-endpoint"
+  >
+    Understand the search API and response format
+  </Card>
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card
+    title="Player Functions"
+    icon="circle-play"
+    href="/api/player-functions"
+  >
+    Explore YouTube player integration and controls
+  </Card>
 </CardGroup>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  **Tip:** MYMUSICK works entirely in the browser with no backend dependencies (except the search API). You can customize it freely!
 </Note>

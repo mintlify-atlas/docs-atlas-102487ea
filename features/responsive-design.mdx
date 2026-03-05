@@ -1,0 +1,486 @@
+---
+title: 'Responsive Design'
+description: 'Mobile-first CSS architecture with adaptive layouts and breakpoints'
+icon: 'mobile'
+---
+
+## Overview
+
+MYMUSICK features a fully responsive design that adapts seamlessly to different screen sizes. The layout transforms from a desktop experience with a fixed sidebar to a mobile-friendly single-column layout.
+
+## CSS Variables
+
+The design system uses CSS custom properties for consistent theming:
+
+```css estilooriginal.css:11-16
+:root {
+  --primary: #04CDA8;
+  --accent: #FF5757;
+  --bg-dark: #111;
+  --text-light: white;
+}
+```
+
+<Note>
+  CSS variables enable consistent color usage across components and make theme customization easy.
+</Note>
+
+### Color Palette
+
+<CardGroup cols={3}>
+  <Card title="Primary" icon="palette">
+    **#04CDA8** - Teal/cyan used for header and footer backgrounds
+  </Card>
+  <Card title="Accent" icon="palette">
+    **#FF5757** - Coral red used for borders, buttons, and highlights
+  </Card>
+  <Card title="Background" icon="palette">
+    **#111** - Near-black used for sidebar and card backgrounds
+  </Card>
+</CardGroup>
+
+## Viewport Configuration
+
+The HTML includes proper viewport settings for mobile devices:
+
+```html index.html:6
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+```
+
+## Breakpoint System
+
+MYMUSICK uses a single breakpoint for mobile devices:
+
+```css estilooriginal.css:293
+@media (max-width: 600px) {
+  /* Mobile styles */
+}
+```
+
+### Why 600px?
+
+- Covers most smartphones in portrait mode
+- Below this width, the sidebar becomes impractical
+- Standard breakpoint for mobile-first responsive design
+
+<Accordion title="Common Device Widths">
+- **iPhone SE**: 375px
+- **iPhone 12/13/14**: 390px
+- **iPhone 12/13/14 Pro Max**: 428px
+- **Small Android phones**: 360px
+- **Large Android phones**: 412px
+- **Tablets (portrait)**: 768px+
+</Accordion>
+
+## Desktop Layout
+
+### Header Design
+
+The desktop header uses flexbox for horizontal alignment:
+
+```css estilooriginal.css:37-45
+header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  min-height: 150px;
+  padding: 0 20px;
+  background: var(--primary);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+```
+
+### Fixed Sidebar
+
+The sidebar is positioned fixed on the left side:
+
+```css estilooriginal.css:106-120
+.sidebar {
+  position: fixed;
+  top: 150px;
+  bottom: 0;
+  left: 0;
+  width: 170px;
+  padding: 20px 0;
+  background: var(--bg-dark);
+  border-radius: 15px;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+```
+
+<Note>
+  The sidebar is fixed from `top: 150px` (below header) to `bottom: 0`, creating a full-height navigation panel.
+</Note>
+
+### Main Content Area
+
+The results container has a left margin to account for the sidebar:
+
+```css estilooriginal.css:162-163
+#results {
+  margin-left: 200px;
+  /* ... */
+}
+```
+
+## Mobile Adaptations
+
+The responsive design makes several key changes for screens ≤600px:
+
+### 1. Header Transformation
+
+```css estilooriginal.css:295-299
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+  }
+}
+```
+
+**Changes:**
+- **Layout**: Switches from row to column (`flex-direction: column`)
+- **Spacing**: Adds 15px gap between elements
+- **Padding**: Uniform 20px padding on all sides
+
+<Accordion title="Desktop vs Mobile Header">
+**Desktop Layout:**
+```
+[Logo + Title] [Search Input] [Login Button]
+```
+
+**Mobile Layout:**
+```
+[Logo + Title]
+[Search Input]
+[Login Button]
+```
+</Accordion>
+
+### 2. Sidebar Removal
+
+```css estilooriginal.css:301-303
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+}
+```
+
+<Warning>
+  The sidebar is completely hidden on mobile devices to maximize screen space for content.
+</Warning>
+
+**Rationale:**
+- Navigation links become less practical on small screens
+- More vertical space needed for scrollable content
+- Prevents overcrowding of the interface
+
+### 3. Full-Width Results
+
+```css estilooriginal.css:305-308
+@media (max-width: 600px) {
+  #results {
+    margin-left: 0;
+    padding: 10px;
+  }
+}
+```
+
+**Changes:**
+- **Margin**: Removes left margin (no sidebar to account for)
+- **Padding**: Reduces padding from 20px to 10px for more content space
+
+### 4. Scaled Title
+
+```css estilooriginal.css:310-312
+@media (max-width: 600px) {
+  .title {
+    font-size: 28px;
+  }
+}
+```
+
+**Desktop:** 40px → **Mobile:** 28px (30% reduction)
+
+### 5. Responsive Search Input
+
+```css estilooriginal.css:314-317
+@media (max-width: 600px) {
+  .search {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+```
+
+**Desktop behavior:**
+```css
+width: 250px;
+.search:focus { width: 280px; }
+```
+
+**Mobile behavior:**
+- Takes full available width
+- Capped at 300px maximum
+- No width change on focus (already at max)
+
+### 6. Player Layout Reflow
+
+```css estilooriginal.css:319-322
+@media (max-width: 600px) {
+  .player {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+```
+
+**Desktop layout:**
+```
+[Now Playing Text] [Play/Pause Button]
+```
+
+**Mobile layout:**
+```
+[Now Playing Text]
+[Play/Pause Button]
+```
+
+### 7. Scaled Now Playing Text
+
+```css estilooriginal.css:324-326
+@media (max-width: 600px) {
+  #nowPlaying {
+    font-size: 14px;
+  }
+}
+```
+
+**Desktop:** 18px → **Mobile:** 14px (22% reduction)
+
+## Flexible Components
+
+### Song Cards
+
+Song cards adapt naturally without specific media queries:
+
+```css estilooriginal.css:190-202
+.song {
+  min-width: 160px;
+  padding: 12px;
+  background: var(--bg-dark);
+  border-radius: 15px;
+  /* ... */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: 0.2s ease;
+}
+```
+
+<Note>
+  Using `min-width` instead of fixed `width` allows cards to maintain consistent sizing across devices while being scrollable horizontally.
+</Note>
+
+### Image Aspect Ratio
+
+```css estilooriginal.css:210-215
+.song img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 12px;
+  object-fit: cover;
+}
+```
+
+**Benefits:**
+- `width: 100%` makes images responsive to container size
+- `aspect-ratio: 1/1` ensures perfect squares regardless of original image dimensions
+- `object-fit: cover` prevents distortion
+
+## Scroll Behavior
+
+### Horizontal Scrolling
+
+The results container uses modern CSS scroll features:
+
+```css estilooriginal.css:162-172
+#results {
+  margin-left: 200px;
+  padding: 20px;
+  min-height: 400px;
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  align-items: flex-start;
+}
+```
+
+#### Scroll Snap Points
+
+```css
+scroll-snap-type: x mandatory;
+```
+
+Combined with:
+
+```css estilooriginal.css:200
+scroll-snap-align: start;
+```
+
+This creates a **carousel-like experience** where song cards "snap" into position when scrolling.
+
+<Accordion title="Scroll Snap Behavior">
+- **`x mandatory`**: Horizontal snapping that always snaps to a point
+- **`start`**: Cards snap when their left edge reaches the container's left edge
+- **Benefit**: Prevents cards from being cut off mid-scroll
+</Accordion>
+
+### Custom Scrollbar
+
+The horizontal scrollbar is styled for better aesthetics:
+
+```css estilooriginal.css:174-185
+#results::-webkit-scrollbar {
+  height: 8px;
+}
+
+#results::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+#results::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+```
+
+<Note>
+  The scrollbar uses the accent color (`#FF5757`) for the thumb, maintaining visual consistency with the design system.
+</Note>
+
+## Transition Animations
+
+Smooth transitions enhance the responsive experience:
+
+### Search Input Expansion
+
+```css estilooriginal.css:77
+transition: 0.3s ease;
+```
+
+Applies to width changes on focus (desktop only).
+
+### Button Hover Effects
+
+```css estilooriginal.css:94
+transition: 0.2s ease;
+```
+
+Affects background, color, and transform properties.
+
+### Song Card Animations
+
+```css estilooriginal.css:201
+transition: 0.2s ease;
+```
+
+Smooth hover effects for background, border, and transform.
+
+### Sidebar Link Hover
+
+```css estilooriginal.css:129,145
+transition: 0.3s ease;
+```
+
+Animates color changes and the left accent bar reveal.
+
+## Typography Scaling
+
+### Desktop Sizes
+
+- **Title**: 40px (Gyanko font)
+- **Intro Text**: 25px (Gyanko font)
+- **Now Playing**: 18px (Segoe UI)
+- **Search Input**: 16px
+- **Button Text**: 16px
+- **Song Title**: 14px
+- **Song Artist**: 12px
+
+### Mobile Adjustments
+
+- **Title**: 28px (↓30%)
+- **Now Playing**: 14px (↓22%)
+
+<Warning>
+  Only the most prominent text elements are scaled down on mobile. Body text remains at original sizes to maintain readability.
+</Warning>
+
+## Flexbox Architecture
+
+MYMUSICK uses flexbox extensively for responsive layouts:
+
+<CardGroup cols={2}>
+  <Card title="Header" icon="align-center">
+    `display: flex` with `justify-content: space-around`
+  </Card>
+  <Card title="Sidebar" icon="align-left">
+    `flex-direction: column` for vertical navigation
+  </Card>
+  <Card title="Results" icon="grip-horizontal">
+    `display: flex` with horizontal overflow scrolling
+  </Card>
+  <Card title="Player" icon="play">
+    Centered flex container with gap spacing
+  </Card>
+</CardGroup>
+
+## Best Practices Implemented
+
+<Steps>
+  <Step title="Mobile-First Viewport">
+    Proper meta viewport tag ensures correct scaling on mobile devices
+  </Step>
+  <Step title="Single Breakpoint">
+    Simple 600px breakpoint avoids over-complicated media queries
+  </Step>
+  <Step title="Progressive Enhancement">
+    Desktop layout is the base, mobile adjustments are added
+  </Step>
+  <Step title="Flexible Units">
+    Uses percentage widths, min/max constraints, and viewport units
+  </Step>
+  <Step title="Modern CSS Features">
+    Leverages flexbox, CSS variables, aspect-ratio, and scroll-snap
+  </Step>
+</Steps>
+
+## Testing Recommendations
+
+<Accordion title="Devices to Test">
+- **Mobile**: iPhone SE (375px), iPhone 14 (390px), Galaxy S21 (360px)
+- **Tablet**: iPad (768px), iPad Pro (1024px)
+- **Desktop**: 1920×1080, 1366×768
+- **Ultra-wide**: 2560×1440
+</Accordion>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Music Search" icon="magnifying-glass" href="/features/music-search">
+    See how the search interface adapts to mobile layouts
+  </Card>
+  <Card title="YouTube Player" icon="play" href="/features/youtube-player">
+    Learn how player controls reflow on small screens
+  </Card>
+</CardGroup>

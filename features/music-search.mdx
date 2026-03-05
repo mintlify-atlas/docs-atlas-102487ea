@@ -1,0 +1,265 @@
+---
+title: 'Music Search'
+description: 'Search and discover music using the MYMUSICK backend API'
+icon: 'magnifying-glass'
+---
+
+## Overview
+
+The music search feature allows users to search for songs by querying the MYMUSICK backend API. The search is triggered by pressing Enter in the search input field, and results are dynamically rendered as interactive cards.
+
+## Search Input
+
+The search interface is located in the header with an accessible, styled input field:
+
+```html index.html:40-44
+<input id="searchInput"
+       class="search"
+       type="search"
+       placeholder="Busca tu Música 🎵"
+       aria-label="Buscar canciones">
+```
+
+### Input Styling
+
+The search input features an elegant design with focus animations:
+
+```css estilooriginal.css:68-83
+.search {
+  width: 250px;
+  padding: 12px 15px;
+  border-radius: 20px;
+  border: 2px solid var(--accent);
+  background: black;
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: 0.3s ease;
+}
+
+.search:focus {
+  width: 280px;
+  box-shadow: 0 0 10px rgba(255,87,87,0.5);
+}
+```
+
+<Note>
+  The search input expands from 250px to 280px on focus and adds a red glow effect for better user experience.
+</Note>
+
+## API Integration
+
+The search functionality connects to the MYMUSICK backend API hosted on Render:
+
+```javascript index.html:113-134
+input.addEventListener("keydown", async (e) => {
+  if (e.key !== "Enter") return;
+
+  const query = input.value.trim();
+  if (!query) return;
+
+  results.innerHTML = `<p>Buscando... 🎵</p>`;
+
+  try {
+    const res = await fetch(
+      `https://mymusick-backend.onrender.com/search?q=${encodeURIComponent(query)}`
+    );
+
+    if (!res.ok) throw new Error();
+
+    const songs = await res.json();
+    renderSongs(songs);
+
+  } catch {
+    results.innerHTML = `<p>Error al buscar 😕</p>`;
+  }
+});
+```
+
+### API Endpoint
+
+<CodeGroup>
+```bash Request Format
+GET https://mymusick-backend.onrender.com/search?q={query}
+```
+
+```json Response Format
+[
+  {
+    "id": "dQw4w9WgXcQ",
+    "title": "Never Gonna Give You Up",
+    "artist": "Rick Astley",
+    "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg"
+  }
+]
+```
+</CodeGroup>
+
+<Warning>
+  The query parameter is encoded using `encodeURIComponent()` to ensure special characters are properly handled.
+</Warning>
+
+## Rendering Search Results
+
+The `renderSongs()` function dynamically creates song cards from the API response:
+
+```javascript index.html:139-172
+function renderSongs(songs) {
+  results.innerHTML = "";
+
+  if (!songs?.length) {
+    results.innerHTML = `<p>No se encontraron resultados</p>`;
+    return;
+  }
+
+  songs.forEach(song => {
+    const div = document.createElement("div");
+    div.className = "song";
+    div.tabIndex = 0;
+
+    div.innerHTML = `
+      <img src="${song.thumbnail}" 
+           alt="Portada de ${song.title}"
+           loading="lazy"
+           crossorigin="anonymous">
+      <div class="song-info">
+        <strong>${song.title}</strong>
+        <small>${song.artist}</small>
+      </div>
+    `;
+
+    div.addEventListener("mouseenter", () => detectarColor(song.thumbnail, div));
+    div.addEventListener("mouseleave", () => div.style.background = "");
+    div.addEventListener("click", () => loadSong(song));
+    div.addEventListener("keydown", e => {
+      if (e.key === "Enter") loadSong(song);
+    });
+
+    results.appendChild(div);
+  });
+}
+```
+
+### Song Card Structure
+
+Each song card includes:
+- **Thumbnail image** with lazy loading and CORS support
+- **Title** displayed in bold
+- **Artist name** in smaller, gray text
+- **Interactive events** for hover, click, and keyboard navigation
+
+### Song Card Styling
+
+```css estilooriginal.css:190-236
+.song {
+  min-width: 160px;
+  padding: 12px;
+  background: var(--bg-dark);
+  border-radius: 15px;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: 0.2s ease;
+}
+
+.song:hover {
+  background: #1e1e1e;
+  border-color: var(--accent);
+  transform: translateY(-6px);
+}
+
+.song img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 12px;
+  object-fit: cover;
+}
+```
+
+<Note>
+  Song cards feature a smooth lift animation on hover (`translateY(-6px)`) and dynamic background coloring based on the thumbnail's dominant color.
+</Note>
+
+## Results Container
+
+The results are displayed in a horizontally scrollable container:
+
+```css estilooriginal.css:162-185
+#results {
+  margin-left: 200px;
+  padding: 20px;
+  min-height: 400px;
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  align-items: flex-start;
+}
+
+#results::-webkit-scrollbar {
+  height: 8px;
+}
+
+#results::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+#results::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+```
+
+## Usage Example
+
+<Accordion title="Complete Search Flow Example">
+1. User types "rock music" in the search input
+2. User presses Enter
+3. Loading message displays: "Buscando... 🎵"
+4. API request is sent to `https://mymusick-backend.onrender.com/search?q=rock%20music`
+5. Response contains array of song objects
+6. `renderSongs()` creates interactive cards for each song
+7. User hovers over a card → dominant color extraction triggers
+8. User clicks a card → song loads in the YouTube player
+</Accordion>
+
+## Accessibility Features
+
+- **Semantic HTML**: Uses `<input type="search">` with proper `aria-label`
+- **Keyboard Navigation**: Song cards are focusable with `tabIndex={0}`
+- **Enter Key Support**: Songs can be played by pressing Enter when focused
+- **Alt Text**: All images include descriptive alt attributes
+
+## Error Handling
+
+The search implementation includes robust error handling:
+
+```javascript
+try {
+  const res = await fetch(/* API URL */);
+  if (!res.ok) throw new Error();
+  const songs = await res.json();
+  renderSongs(songs);
+} catch {
+  results.innerHTML = `<p>Error al buscar 😕</p>`;
+}
+```
+
+<Warning>
+  If the API request fails or returns a non-OK status, users see a friendly error message instead of a blank screen.
+</Warning>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="YouTube Player" icon="play" href="/features/youtube-player">
+    Learn how selected songs are played using the YouTube IFrame API
+  </Card>
+  <Card title="Dynamic Theming" icon="palette" href="/features/dynamic-theming">
+    Discover how dominant colors are extracted from thumbnails
+  </Card>
+</CardGroup>

@@ -1,0 +1,315 @@
+---
+title: 'YouTube Player'
+description: 'Integrated YouTube IFrame API player for seamless music playback'
+icon: 'play'
+---
+
+## Overview
+
+MYMUSICK uses the YouTube IFrame API to provide seamless music playback. The player is initialized on page load and remains hidden in the footer, with only the controls visible to users.
+
+## YouTube IFrame API Integration
+
+The YouTube API script is loaded in the HTML:
+
+```html index.html:82
+<script src="https://www.youtube.com/iframe_api"></script>
+```
+
+### Player Initialization
+
+The player is initialized when the YouTube API is ready:
+
+```javascript index.html:101-108
+window.onYouTubeIframeAPIReady = function () {
+  player = new YT.Player("yt-player", {
+    height: "0",
+    width: "0",
+    playerVars: { autoplay: 0 },
+    events: { onStateChange: onPlayerStateChange }
+  });
+};
+```
+
+<Note>
+  The player dimensions are set to `0x0` because the video is not displayed—only audio playback is used.
+</Note>
+
+## Player HTML Structure
+
+The player is embedded in the footer with a hidden container:
+
+```html index.html:65-69
+<footer class="player">
+  <span id="nowPlaying">Selecciona una canción</span>
+  <button id="playPauseBtn" class="hidden">▶️ Reproducir</button>
+  <div id="yt-player" class="hidden"></div>
+</footer>
+```
+
+### Footer Styling
+
+The footer is fixed at the bottom with centered content:
+
+```css estilooriginal.css:241-253
+footer.player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: var(--primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+```
+
+## Player State Variables
+
+Two global variables track the player state:
+
+```javascript index.html:95-96
+let player;
+let isPlaying = false;
+```
+
+- **`player`**: Reference to the YouTube IFrame Player instance
+- **`isPlaying`**: Boolean tracking whether a song is currently playing
+
+## Loading Songs
+
+When a user clicks a song card, the `loadSong()` function is triggered:
+
+```javascript index.html:215-222
+function loadSong(song) {
+  if (!player) return;
+
+  nowPlayingText.textContent = `${song.title} - ${song.artist}`;
+
+  player.loadVideoById(song.id);
+  player.playVideo();
+}
+```
+
+### Load Process
+
+<Steps>
+  <Step title="Check Player Availability">
+    Ensures the YouTube player has been initialized before attempting playback
+  </Step>
+  <Step title="Update Now Playing Display">
+    Sets the footer text to show the current song title and artist
+  </Step>
+  <Step title="Load Video by ID">
+    Uses `player.loadVideoById()` to load the YouTube video using its ID
+  </Step>
+  <Step title="Start Playback">
+    Immediately starts playing the video with `player.playVideo()`
+  </Step>
+</Steps>
+
+## Play/Pause Toggle
+
+The play/pause button controls playback state:
+
+```javascript index.html:224-228
+function togglePlayPause() {
+  if (!player) return;
+
+  isPlaying ? player.pauseVideo() : player.playVideo();
+}
+```
+
+### Button Event Listener
+
+```javascript index.html:236
+playPauseBtn.onclick = togglePlayPause;
+```
+
+<CodeGroup>
+```javascript Play Video
+player.playVideo();
+```
+
+```javascript Pause Video
+player.pauseVideo();
+```
+
+```javascript Load Video by ID
+player.loadVideoById(videoId);
+```
+</CodeGroup>
+
+## Player State Change Handler
+
+The `onPlayerStateChange` callback updates the UI based on playback state:
+
+```javascript index.html:230-234
+function onPlayerStateChange(event) {
+  isPlaying = event.data === YT.PlayerState.PLAYING;
+  playPauseBtn.classList.remove("hidden");
+  playPauseBtn.textContent = isPlaying ? "⏸️ Pausar" : "▶️ Reproducir";
+}
+```
+
+### State Change Flow
+
+<Accordion title="YouTube Player States">
+- **UNSTARTED** (-1): Video has not started
+- **ENDED** (0): Video has finished playing
+- **PLAYING** (1): Video is currently playing
+- **PAUSED** (2): Video is paused
+- **BUFFERING** (3): Video is buffering
+- **CUED** (5): Video has been cued
+</Accordion>
+
+### UI Updates
+
+1. **Update `isPlaying` flag**: Sets to `true` if state is `PLAYING`
+2. **Show button**: Removes the `hidden` class from the play/pause button
+3. **Update button text**: Changes between "⏸️ Pausar" and "▶️ Reproducir"
+
+## Now Playing Display
+
+The "Now Playing" text is styled to be prominent in the footer:
+
+```css estilooriginal.css:284-288
+#nowPlaying {
+  font-weight: bold;
+  color: black;
+  text-align: center;
+}
+```
+
+### Initial State
+
+```html
+<span id="nowPlaying">Selecciona una canción</span>
+```
+
+The default message prompts users to select a song before playback begins.
+
+## Player Controls Styling
+
+The play/pause button features hover effects:
+
+```css estilooriginal.css:269-282
+.player button {
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: 2px solid var(--accent);
+  background: black;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.player button:hover {
+  background: var(--accent);
+  color: black;
+}
+```
+
+<Note>
+  On hover, the button inverts colors: background changes to accent red (`#FF5757`) and text becomes black.
+</Note>
+
+## Responsive Player Design
+
+On mobile devices, the player layout adapts:
+
+```css estilooriginal.css:319-326
+@media (max-width: 600px) {
+  .player {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #nowPlaying {
+    font-size: 14px;
+  }
+}
+```
+
+### Mobile Adaptations
+
+- **Layout**: Changes from horizontal to vertical (`flex-direction: column`)
+- **Text Size**: Reduces "Now Playing" font size to 14px
+- **Gap**: Reduces spacing between elements to 10px
+
+## Usage Example
+
+<Accordion title="Complete Playback Flow">
+1. **Page Load**: YouTube IFrame API script loads
+2. **API Ready**: `onYouTubeIframeAPIReady()` callback fires
+3. **Player Created**: YouTube player initialized with 0x0 dimensions
+4. **User Searches**: User searches for "rock music"
+5. **Results Displayed**: Song cards appear in the results container
+6. **User Clicks Song**: Click event triggers `loadSong(songObject)`
+7. **Update Display**: "Now Playing" text updates to song title and artist
+8. **Load Video**: `player.loadVideoById(song.id)` loads the YouTube video
+9. **Auto Play**: `player.playVideo()` starts playback immediately
+10. **State Change**: `onPlayerStateChange()` updates button to "⏸️ Pausar"
+11. **User Controls**: User can pause/resume with the play/pause button
+</Accordion>
+
+## Hidden Element Utility
+
+The `.hidden` class is used to hide elements until needed:
+
+```css index.html:14-16
+.hidden {
+  display: none !important;
+}
+```
+
+This class is applied to:
+- **Play/Pause Button**: Hidden until a song starts playing
+- **YouTube Player Container**: Always hidden since video display is not needed
+- **Canvas Element**: Hidden canvas used for color extraction
+
+## DOM References
+
+The player functionality relies on these DOM references:
+
+```javascript index.html:85-91
+const input = document.getElementById("searchInput");
+const results = document.getElementById("results");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const playPauseBtn = document.getElementById("playPauseBtn");
+const nowPlayingText = document.getElementById("nowPlaying");
+const loginModal = document.getElementById("loginModal");
+```
+
+## Player Configuration
+
+<Warning>
+  The `playerVars` object is set with `autoplay: 0`, but playback is manually triggered with `player.playVideo()` after loading. This gives more control over the autoplay behavior.
+</Warning>
+
+### Available Player Variables
+
+```javascript
+playerVars: {
+  autoplay: 0,        // 0 = no autoplay, 1 = autoplay
+  controls: 0,        // Hide YouTube controls
+  disablekb: 1,       // Disable keyboard controls
+  fs: 0,              // Hide fullscreen button
+  modestbranding: 1   // Hide YouTube logo
+}
+```
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Music Search" icon="magnifying-glass" href="/features/music-search">
+    Learn how users search and select songs to play
+  </Card>
+  <Card title="Responsive Design" icon="mobile" href="/features/responsive-design">
+    See how the player adapts to different screen sizes
+  </Card>
+</CardGroup>

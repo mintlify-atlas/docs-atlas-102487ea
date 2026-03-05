@@ -1,0 +1,673 @@
+---
+title: 'Typography'
+description: 'Font families, sizing system, and text styles in MYMUSICK'
+icon: 'font'
+---
+
+# Typography System
+
+MYMUSICK uses distinct typography strategies in each theme. The original theme features a custom Gyanko font, while the formal theme uses modern Google Fonts with a clear hierarchy.
+
+## Font Families
+
+<Tabs>
+  <Tab title="Original Theme">
+    ### Gyanko Custom Font
+
+    The original theme's primary brand font is **Gyanko**, a custom typeface loaded via `@font-face`.
+
+    <CodeGroup>
+    ```css Font Declaration
+    @font-face {
+      font-family: 'Gyanko';
+      src: url("fonts/gyanko-regular.otf") format("opentype");
+      font-weight: normal;
+      font-style: normal;
+    }
+    ```
+
+    ```css Base Typography
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-light);
+    }
+    ```
+    </CodeGroup>
+
+    ### Font Stack
+
+    | Element | Font Family | Purpose |
+    |---------|-------------|----------|
+    | Body | `'Segoe UI', Tahoma, Geneva, Verdana, sans-serif` | Body text, metadata |
+    | `.title` | `'Gyanko', sans-serif` | Logo/brand text |
+    | `.bttlg` | `'Gyanko', sans-serif` | Buttons |
+    | `.sidebar a` | `'Gyanko', sans-serif` | Navigation links |
+    | `.intxt` | `'Gyanko', sans-serif` | Section headings |
+
+    ### Character Set
+
+    <Note>
+      Gyanko is a display font best used for headings and UI elements. Ensure the font file is available at `fonts/gyanko-regular.otf` relative to your CSS file.
+    </Note>
+
+    ### Usage Examples
+
+    <CodeGroup>
+    ```css Title / Logo
+    .title {
+      font-family: 'Gyanko', sans-serif;
+      font-size: 40px;
+      letter-spacing: 2px;
+      color: var(--accent);          /* #FF5757 */
+      font-weight: normal;
+      margin: 0;
+    }
+    ```
+
+    ```css Navigation
+    .sidebar a {
+      font-family: 'Gyanko', sans-serif;
+      font-size: 24px;               /* Large, readable */
+      color: white;
+      text-decoration: none;
+    }
+    ```
+
+    ```css Section Headings
+    .intxt {
+      margin-top: 40px;
+      font-family: 'Gyanko', sans-serif;
+      font-size: 25px;
+      text-align: center;
+    }
+    ```
+
+    ```css Buttons
+    .bttlg {
+      font-family: 'Gyanko', sans-serif;
+      font-size: 16px;
+      /* Bold, custom appearance */
+    }
+    ```
+    </CodeGroup>
+  </Tab>
+
+  <Tab title="Formal Theme">
+    ### Google Fonts Stack
+
+    The formal theme combines **Bebas Neue** (display) with **DM Sans** (body) for a professional, modern aesthetic.
+
+    <CodeGroup>
+    ```css Font Import
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+    ```
+
+    ```css CSS Variables
+    :root {
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+    }
+    ```
+
+    ```css Base Typography
+    body {
+      font-family: var(--font-body);     /* DM Sans */
+      font-size: 15px;
+      color: var(--text);                /* #e8e6df */
+    }
+    ```
+    </CodeGroup>
+
+    ### Font Roles
+
+    | Font | Variable | Usage | Characteristics |
+    |------|----------|-------|----------------|
+    | **Bebas Neue** | `--font-display` | Titles, headings, large text | All-caps, condensed, bold |
+    | **DM Sans** | `--font-body` | Body, UI text, labels | Clean, geometric, legible |
+
+    ### DM Sans Weight Scale
+
+    <CardGroup cols={4}>
+      <Card title="Light: 300" icon="feather">
+        Metadata, captions
+      </Card>
+      <Card title="Regular: 400" icon="align-left">
+        Body text
+      </Card>
+      <Card title="Medium: 500" icon="bold">
+        Buttons, labels
+      </Card>
+      <Card title="Light Italic: 300" icon="italic">
+        Emphasis
+      </Card>
+    </CardGroup>
+
+    ### Usage Examples
+
+    <CodeGroup>
+    ```css Display: Logo
+    .title {
+      font-family: var(--font-display);  /* Bebas Neue */
+      font-size: 28px;
+      letter-spacing: 3px;
+      color: var(--accent);              /* #e8ff47 */
+      font-weight: normal;
+      line-height: 1;
+    }
+    ```
+
+    ```css Display: Section Heading
+    .intxt {
+      margin-top: 40px;
+      font-family: var(--font-display);  /* Bebas Neue */
+      font-size: clamp(42px, 5vw, 72px); /* Responsive */
+      line-height: .95;
+      letter-spacing: 1px;
+    }
+    ```
+
+    ```css Display: Dialog Heading
+    .login-form h3 {
+      font-family: var(--font-display);  /* Bebas Neue */
+      font-size: 32px;
+      letter-spacing: 2px;
+      color: var(--accent);
+    }
+    ```
+
+    ```css Body: Navigation
+    .sidebar a {
+      font-family: var(--font-body);     /* DM Sans */
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: .2px;
+    }
+    ```
+
+    ```css Body: Buttons
+    .bttlg {
+      font-family: var(--font-body);     /* DM Sans */
+      font-weight: 500;                  /* Medium */
+      font-size: 13px;
+      letter-spacing: .5px;
+    }
+    ```
+
+    ```css Body: Player
+    #nowPlaying {
+      font-family: var(--font-body);     /* DM Sans */
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    ```
+    </CodeGroup>
+  </Tab>
+</Tabs>
+
+## Type Scale
+
+### Original Theme Sizing
+
+<Tabs>
+  <Tab title="Desktop">
+    | Element | Size | Font | Usage |
+    |---------|------|------|-------|
+    | `.title` | `40px` | Gyanko | Logo/header |
+    | `.intxt` | `25px` | Gyanko | Section heading |
+    | `.sidebar a` | `24px` | Gyanko | Navigation |
+    | `.bttlg` | `16px` | Gyanko | Buttons |
+    | `.search` | `16px` | Segoe UI | Input fields |
+    | `#nowPlaying` | `18px` | Segoe UI | Player text |
+    | `.song strong` | `14px` | Segoe UI | Song title |
+    | `.song small` | `12px` | Segoe UI | Artist name |
+  </Tab>
+
+  <Tab title="Mobile (@max-width: 600px)">
+    | Element | Size | Change |
+    |---------|------|--------|
+    | `.title` | `28px` | -12px |
+    | `.intxt` | `25px` | No change |
+    | `#nowPlaying` | `14px` | -4px |
+    | Other elements | Same | Unchanged |
+  </Tab>
+</Tabs>
+
+### Formal Theme Sizing
+
+<Tabs>
+  <Tab title="Desktop">
+    | Element | Size | Font | Usage |
+    |---------|------|------|-------|
+    | `.intxt` | `clamp(42px, 5vw, 72px)` | Bebas Neue | Hero heading |
+    | `.login-form h3` | `32px` | Bebas Neue | Dialog heading |
+    | `.title` | `28px` | Bebas Neue | Logo |
+    | Body | `15px` | DM Sans | Base text |
+    | `.sidebar a` | `14px` | DM Sans | Navigation |
+    | `.search` | `14px` | DM Sans | Input |
+    | `.song strong` | `13.5px` | DM Sans | Song title |
+    | `.bttlg` | `13px` | DM Sans | Buttons |
+    | `#nowPlaying` | `13px` | DM Sans | Player text |
+    | `.song small` | `12px` | DM Sans | Metadata |
+  </Tab>
+
+  <Tab title="Mobile (@max-width: 768px)">
+    | Element | Size | Change |
+    |---------|------|--------|
+    | `.intxt` | `36px` | Fixed size |
+    | `.title` | `24px` | -4px |
+    | `#nowPlaying` | `13px` | No change |
+    | Other elements | Same | Unchanged |
+  </Tab>
+</Tabs>
+
+## Letter Spacing
+
+Both themes use letter-spacing for display typography to enhance readability and brand presence.
+
+<CodeGroup>
+```css Original Theme
+.title {
+  letter-spacing: 2px;     /* Logo: moderate tracking */
+}
+
+/* No letter-spacing on other elements */
+```
+
+```css Formal Theme
+.title {
+  letter-spacing: 3px;     /* Logo: wider tracking */
+}
+
+.intxt {
+  letter-spacing: 1px;     /* Hero: subtle tracking */
+}
+
+.login-form h3 {
+  letter-spacing: 2px;     /* Dialog: balanced */
+}
+
+.sidebar a {
+  letter-spacing: .2px;    /* Nav: micro adjustment */
+}
+
+.bttlg {
+  letter-spacing: .5px;    /* Button: slight spacing */
+}
+```
+</CodeGroup>
+
+<Note>
+  Bebas Neue naturally has condensed proportions, so increased letter-spacing improves legibility at display sizes.
+</Note>
+
+## Line Height
+
+### Original Theme
+```css
+/* Uses browser defaults for most elements */
+/* No explicit line-height declarations */
+```
+
+### Formal Theme
+```css
+.title {
+  line-height: 1;          /* Tight for logo */
+}
+
+.intxt {
+  line-height: .95;        /* Extra tight for hero */
+}
+
+/* Body elements use browser defaults (~1.5) */
+```
+
+## Text Overflow Handling
+
+Both themes implement ellipsis truncation for song metadata:
+
+<CodeGroup>
+```css Original Theme
+.song-info {
+  overflow: hidden;
+}
+
+.song strong,
+.song small {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+```
+
+```css Formal Theme
+.song-info {
+  flex: 1;
+  min-width: 0;            /* Enable flex truncation */
+  overflow: hidden;
+}
+
+.song strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#nowPlaying {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+```
+</CodeGroup>
+
+## Text Colors
+
+### Original Theme
+<CodeGroup>
+```css Primary Text
+body {
+  color: var(--text-light);      /* white */
+}
+
+.title {
+  color: var(--accent);          /* #FF5757 coral */
+}
+
+#nowPlaying {
+  color: black;                  /* High contrast on teal */
+}
+```
+
+```css Secondary Text
+.song small {
+  color: #aaa;                   /* Light gray */
+}
+```
+</CodeGroup>
+
+### Formal Theme
+<CodeGroup>
+```css Semantic Text Colors
+body {
+  color: var(--text);            /* #e8e6df warm white */
+}
+
+.title, .login-form h3 {
+  color: var(--accent);          /* #e8ff47 yellow */
+}
+
+.sidebar a {
+  color: var(--muted);           /* #6b6b72 gray */
+}
+
+.sidebar a:hover {
+  color: var(--text);            /* Brighten on hover */
+}
+
+.song strong {
+  color: var(--text);            /* Primary text */
+}
+
+.song small {
+  color: var(--muted);           /* Secondary text */
+  font-weight: 300;              /* Lighter weight */
+}
+```
+
+```css Input Placeholders
+.search::placeholder,
+.login-form input::placeholder {
+  color: var(--muted);           /* #6b6b72 */
+}
+```
+</CodeGroup>
+
+## Responsive Typography
+
+### Original Theme
+<CodeGroup>
+```css Mobile Adjustments (@max-width: 600px)
+@media (max-width: 600px) {
+  .title {
+    font-size: 28px;             /* Down from 40px */
+  }
+
+  #nowPlaying {
+    font-size: 14px;             /* Down from 18px */
+  }
+
+  /* Other sizes remain constant */
+}
+```
+</CodeGroup>
+
+### Formal Theme
+<CodeGroup>
+```css Fluid Typography
+.intxt {
+  font-size: clamp(42px, 5vw, 72px);
+  /* Scales between 42px (mobile) and 72px (desktop) */
+}
+```
+
+```css Mobile Breakpoint (@max-width: 768px)
+@media (max-width: 768px) {
+  .intxt {
+    font-size: 36px;             /* Override clamp */
+  }
+
+  .title {
+    font-size: 24px;             /* Down from 28px */
+  }
+
+  #nowPlaying {
+    font-size: 13px;             /* No change */
+    text-align: center;
+  }
+}
+```
+</CodeGroup>
+
+## Text Alignment
+
+<CodeGroup>
+```css Original Theme
+.intxt {
+  text-align: center;            /* Centered headings */
+}
+
+#nowPlaying {
+  text-align: center;
+}
+
+/* Mobile specific */
+@media (max-width: 600px) {
+  #nowPlaying {
+    font-size: 14px;
+    /* Already centered */
+  }
+}
+```
+
+```css Formal Theme
+.intxt {
+  text-align: left;              /* Left-aligned hero */
+}
+
+#nowPlaying {
+  text-align: left;              /* Default left */
+}
+
+@media (max-width: 768px) {
+  #nowPlaying {
+    text-align: center;          /* Center on mobile */
+  }
+}
+```
+</CodeGroup>
+
+## Font Loading Strategy
+
+<Tabs>
+  <Tab title="Original: @font-face">
+    ### Self-Hosted Font
+
+    <Steps>
+      <Step title="Font Declaration">
+        ```css
+        @font-face {
+          font-family: 'Gyanko';
+          src: url("fonts/gyanko-regular.otf") format("opentype");
+          font-weight: normal;
+          font-style: normal;
+        }
+        ```
+      </Step>
+
+      <Step title="File Structure">
+        Ensure the font file exists at:
+        ```
+        project/
+        ├── css/
+        │   └── estilooriginal.css
+        └── fonts/
+            └── gyanko-regular.otf
+        ```
+      </Step>
+
+      <Step title="Fallback">
+        Always include fallback fonts:
+        ```css
+        font-family: 'Gyanko', sans-serif;
+        ```
+      </Step>
+    </Steps>
+
+    <Warning>
+      If `gyanko-regular.otf` fails to load, the browser will fall back to the default sans-serif font, which may significantly change the appearance.
+    </Warning>
+  </Tab>
+
+  <Tab title="Formal: Google Fonts">
+    ### CDN-Hosted Fonts
+
+    <Steps>
+      <Step title="Import Statement">
+        ```css
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+        ```
+      </Step>
+
+      <Step title="CSS Variables">
+        ```css
+        :root {
+          --font-display: 'Bebas Neue', sans-serif;
+          --font-body:    'DM Sans', sans-serif;
+        }
+        ```
+      </Step>
+
+      <Step title="Apply Variables">
+        ```css
+        body { font-family: var(--font-body); }
+        .title { font-family: var(--font-display); }
+        ```
+      </Step>
+    </Steps>
+
+    ### Loading Optimization
+
+    The `display=swap` parameter in the Google Fonts URL ensures:
+    - **Immediate text rendering** with fallback fonts
+    - **Swap to web fonts** once loaded (no invisible text)
+    - **Better perceived performance**
+
+    <Note>
+      Google Fonts are cached across domains, so users likely already have Bebas Neue and DM Sans loaded from other sites.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Limit Font Weights" icon="weight-hanging">
+    Only load the weights you actually use (300, 400, 500 in formal theme)
+  </Card>
+
+  <Card title="Use Variable Fonts" icon="sliders">
+    Consider variable fonts for better performance if many weights are needed
+  </Card>
+
+  <Card title="Fallback Stacks" icon="layer-group">
+    Always include system font fallbacks: `sans-serif`, `serif`, `monospace`
+  </Card>
+
+  <Card title="Optimize Display Fonts" icon="heading">
+    Use display fonts sparingly for headings and brand elements only
+  </Card>
+</CardGroup>
+
+## Accessibility
+
+### Font Size Minimums
+
+<Warning>
+  Ensure body text is at least 14px for readability. Both themes meet this requirement:
+  - Original: 16px (search), 14px+ (song info)
+  - Formal: 15px (body), 13px+ (UI elements)
+</Warning>
+
+### Relative Units
+
+Consider using `rem` instead of `px` for better accessibility:
+
+```css
+/* Current (px) */
+body { font-size: 15px; }
+
+/* Accessible (rem) */
+html { font-size: 100%; }  /* 16px default */
+body { font-size: 0.9375rem; }  /* 15px at default zoom */
+```
+
+<Note>
+  Using `rem` units allows users to scale text globally via browser settings without breaking your layout.
+</Note>
+
+## Typography Utilities
+
+Common text treatment patterns found in both themes:
+
+<CodeGroup>
+```css Text Truncation
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+```
+
+```css No Text Selection (for UI elements)
+.title {
+  -webkit-user-select: none;
+  user-select: none;
+}
+```
+
+```css Smooth Font Rendering
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+```
+</CodeGroup>

@@ -1,0 +1,343 @@
+---
+title: 'Dynamic Theming'
+description: 'Real-time color extraction from album artwork using Canvas API'
+icon: 'palette'
+---
+
+## Overview
+
+MYMUSICK features dynamic theming that extracts the dominant color from song thumbnails and applies it as a background to song cards on hover. This creates a visually cohesive and immersive user experience.
+
+## Color Detection System
+
+The `detectarColor()` function uses the HTML5 Canvas API to analyze image pixels:
+
+```javascript index.html:177-210
+function detectarColor(imgURL, element) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = imgURL;
+
+  img.onload = () => {
+    canvas.width = img.width / 4;
+    canvas.height = img.height / 4;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const colors = {};
+    let max = 0;
+    let dominant = "0,0,0";
+
+    for (let i = 0; i < data.length; i += 16) {
+      const r = data[i];
+      const g = data[i+1];
+      const b = data[i+2];
+
+      if (r+g+b < 60 || r+g+b > 720) continue;
+
+      const rgb = `${r},${g},${b}`;
+      colors[rgb] = (colors[rgb] || 0) + 1;
+
+      if (colors[rgb] > max) {
+        max = colors[rgb];
+        dominant = rgb;
+      }
+    }
+
+    element.style.background = `rgba(${dominant}, 0.35)`;
+  };
+}
+```
+
+## Canvas Element
+
+A hidden canvas is used for pixel analysis:
+
+```html index.html:71
+<canvas id="canvas" class="hidden"></canvas>
+```
+
+### Canvas Context
+
+```javascript index.html:87-88
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+```
+
+The 2D rendering context (`ctx`) provides methods for drawing and reading pixel data.
+
+## How It Works
+
+### Step 1: Image Loading
+
+```javascript
+const img = new Image();
+img.crossOrigin = "anonymous";
+img.src = imgURL;
+```
+
+<Note>
+  `crossOrigin = "anonymous"` is crucial for loading images from external domains (YouTube thumbnails) without CORS errors.
+</Note>
+
+### Step 2: Image Downsampling
+
+```javascript
+canvas.width = img.width / 4;
+canvas.height = img.height / 4;
+ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+```
+
+**Why downsample?**
+- Reduces the number of pixels to analyze (4× smaller in each dimension = 16× fewer pixels)
+- Improves performance significantly
+- Provides accurate dominant color representation
+
+<Accordion title="Performance Comparison">
+- **Full Resolution** (480×360): 172,800 pixels to analyze
+- **Downsampled** (120×90): 10,800 pixels to analyze
+- **Performance Gain**: ~16× faster processing
+</Accordion>
+
+### Step 3: Pixel Data Extraction
+
+```javascript
+const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+```
+
+The `getImageData()` method returns a `Uint8ClampedArray` containing RGBA values:
+
+```javascript
+[r1, g1, b1, a1, r2, g2, b2, a2, r3, g3, b3, a3, ...]
+```
+
+### Step 4: Color Frequency Analysis
+
+```javascript
+const colors = {};
+let max = 0;
+let dominant = "0,0,0";
+
+for (let i = 0; i < data.length; i += 16) {
+  const r = data[i];
+  const g = data[i+1];
+  const b = data[i+2];
+
+  if (r+g+b < 60 || r+g+b > 720) continue;
+
+  const rgb = `${r},${g},${b}`;
+  colors[rgb] = (colors[rgb] || 0) + 1;
+
+  if (colors[rgb] > max) {
+    max = colors[rgb];
+    dominant = rgb;
+  }
+}
+```
+
+#### Loop Optimization
+
+<CodeGroup>
+```javascript Standard Loop
+for (let i = 0; i < data.length; i += 4) {
+  // Process every pixel
+}
+```
+
+```javascript Optimized Loop (MYMUSICK)
+for (let i = 0; i < data.length; i += 16) {
+  // Process every 4th pixel (sample)
+}
+```
+</CodeGroup>
+
+**Why `i += 16`?**
+- Each pixel is 4 bytes (RGBA)
+- Incrementing by 16 samples every 4th pixel
+- Further reduces processing time by 4×
+
+#### Color Filtering
+
+```javascript
+if (r+g+b < 60 || r+g+b > 720) continue;
+```
+
+This condition filters out:
+- **Too dark colors** (sum < 60): Near-black pixels that lack visual impact
+- **Too light colors** (sum > 720): Near-white pixels that would wash out the design
+
+<Note>
+  RGB values range from 0-255 per channel. Sum ranges:
+  - Pure black: 0 + 0 + 0 = 0
+  - Pure white: 255 + 255 + 255 = 765
+  - Filter range: 60-720 (captures vibrant mid-tones)
+</Note>
+
+#### Frequency Counting
+
+```javascript
+const rgb = `${r},${g},${b}`;
+colors[rgb] = (colors[rgb] || 0) + 1;
+
+if (colors[rgb] > max) {
+  max = colors[rgb];
+  dominant = rgb;
+}
+```
+
+The algorithm:
+1. Creates a string key from RGB values (e.g., "120,45,200")
+2. Increments the count for that color
+3. Tracks the color with the highest frequency
+4. Updates `dominant` when a new maximum is found
+
+### Step 5: Apply Background Color
+
+```javascript
+element.style.background = `rgba(${dominant}, 0.35)`;
+```
+
+The dominant color is applied with **35% opacity** to:
+- Maintain text readability
+- Create a subtle, elegant effect
+- Avoid overwhelming the design
+
+## Event Integration
+
+The color detection is triggered by mouse hover events:
+
+```javascript index.html:163-164
+div.addEventListener("mouseenter", () => detectarColor(song.thumbnail, div));
+div.addEventListener("mouseleave", () => div.style.background = "");
+```
+
+### Hover Behavior
+
+<Steps>
+  <Step title="Mouse Enter">
+    User hovers over a song card → `detectarColor()` is called
+  </Step>
+  <Step title="Color Extraction">
+    Canvas API analyzes the thumbnail and determines dominant color
+  </Step>
+  <Step title="Background Applied">
+    Card background smoothly transitions to the dominant color with 35% opacity
+  </Step>
+  <Step title="Mouse Leave">
+    User moves mouse away → background is cleared
+  </Step>
+</Steps>
+
+## CORS Configuration
+
+Both the Image object and HTML img elements use CORS:
+
+```javascript
+img.crossOrigin = "anonymous";
+```
+
+```html index.html:153-156
+<img src="${song.thumbnail}" 
+     alt="Portada de ${song.title}"
+     loading="lazy"
+     crossorigin="anonymous">
+```
+
+<Warning>
+  Without `crossOrigin="anonymous"`, the canvas would be "tainted" by external images, and `getImageData()` would throw a security error.
+</Warning>
+
+## Visual Effects
+
+The dynamic background combines with existing hover effects:
+
+```css estilooriginal.css:204-208
+.song:hover {
+  background: #1e1e1e;
+  border-color: var(--accent);
+  transform: translateY(-6px);
+}
+```
+
+### Combined Effect
+
+1. **Base hover background**: `#1e1e1e` (dark gray)
+2. **Dynamic color overlay**: `rgba(r, g, b, 0.35)` from dominant color
+3. **Border highlight**: Accent red border appears
+4. **Lift animation**: Card rises 6px upward
+
+<Accordion title="CSS Transition Timing">
+```css
+transition: 0.2s ease;
+```
+All hover effects (background, border, transform) animate smoothly over 200ms with an ease timing function.
+</Accordion>
+
+## Performance Optimization Summary
+
+<CardGroup cols={2}>
+  <Card title="Image Downsampling" icon="compress">
+    Reduces image to 25% size (16× fewer pixels)
+  </Card>
+  <Card title="Pixel Sampling" icon="grid">
+    Analyzes every 4th pixel (4× fewer operations)
+  </Card>
+  <Card title="Color Filtering" icon="filter">
+    Skips extreme dark/light pixels (faster iteration)
+  </Card>
+  <Card title="Deferred Execution" icon="clock">
+    Only runs on hover (not during initial render)
+  </Card>
+</CardGroup>
+
+### Total Performance Gain
+
+- **Original pixels**: 480×360 = 172,800
+- **After downsampling**: 120×90 = 10,800 (16× reduction)
+- **After sampling**: ~2,700 pixels (64× total reduction)
+
+## Usage Example
+
+```javascript
+// When rendering song cards
+songs.forEach(song => {
+  const div = document.createElement("div");
+  div.className = "song";
+  
+  // Attach hover event
+  div.addEventListener("mouseenter", () => 
+    detectarColor(song.thumbnail, div)
+  );
+  
+  div.addEventListener("mouseleave", () => 
+    div.style.background = ""
+  );
+  
+  results.appendChild(div);
+});
+```
+
+## Color Theory Application
+
+<Note>
+  By filtering out colors with RGB sums < 60 or > 720, MYMUSICK ensures that only **vibrant, saturated colors** are used for theming—avoiding muddy browns, washed-out grays, and near-black/white values.
+</Note>
+
+### RGB Sum Ranges
+
+| Range | Color Type | Used? |
+|-------|------------|-------|
+| 0-59 | Very dark (blacks, dark grays) | ❌ No |
+| 60-720 | **Vibrant mid-tones** | ✅ **Yes** |
+| 721-765 | Very light (whites, pale colors) | ❌ No |
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Music Search" icon="magnifying-glass" href="/features/music-search">
+    See how song cards are rendered and made interactive
+  </Card>
+  <Card title="Responsive Design" icon="mobile" href="/features/responsive-design">
+    Learn how visual effects adapt to mobile devices
+  </Card>
+</CardGroup>

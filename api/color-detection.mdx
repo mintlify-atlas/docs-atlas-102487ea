@@ -1,0 +1,285 @@
+---
+title: 'Color Detection'
+description: 'Dominant color extraction from song thumbnails using Canvas API'
+---
+
+## Overview
+
+The color detection function analyzes song thumbnails to extract the dominant color and apply it as a background effect. This creates a dynamic, visually appealing hover effect for each song card.
+
+## Global Variables
+
+```javascript
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+```
+
+<Note>
+The canvas element is hidden in the DOM with the `.hidden` class and used only for image processing.
+</Note>
+
+## Function
+
+### detectarColor(imgURL, element)
+
+Detects the dominant color from an image URL and applies it as a semi-transparent background to the specified element.
+
+<ParamField path="imgURL" type="string" required>
+  URL of the image to analyze (typically a song thumbnail)
+</ParamField>
+
+<ParamField path="element" type="HTMLElement" required>
+  DOM element to apply the detected color background to
+</ParamField>
+
+<ResponseField name="return" type="void">
+  No return value - applies style directly to element
+</ResponseField>
+
+## Implementation
+
+```javascript index.html
+function detectarColor(imgURL, element) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = imgURL;
+
+  img.onload = () => {
+    canvas.width = img.width / 4;
+    canvas.height = img.height / 4;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const colors = {};
+    let max = 0;
+    let dominant = "0,0,0";
+
+    for (let i = 0; i < data.length; i += 16) {
+      const r = data[i];
+      const g = data[i+1];
+      const b = data[i+2];
+
+      if (r+g+b < 60 || r+g+b > 720) continue;
+
+      const rgb = `${r},${g},${b}`;
+      colors[rgb] = (colors[rgb] || 0) + 1;
+
+      if (colors[rgb] > max) {
+        max = colors[rgb];
+        dominant = rgb;
+      }
+    }
+
+    element.style.background = `rgba(${dominant}, 0.35)`;
+  };
+}
+```
+
+## Algorithm Breakdown
+
+### Step 1: Image Loading
+
+```javascript
+const img = new Image();
+img.crossOrigin = "anonymous";
+img.src = imgURL;
+```
+
+<ParamField path="crossOrigin" type="string">
+  Set to `"anonymous"` to enable CORS for external images
+</ParamField>
+
+<Warning>
+Without `crossOrigin = "anonymous"`, the Canvas API will be tainted and `getImageData()` will throw a security error.
+</Warning>
+
+### Step 2: Canvas Downscaling
+
+```javascript
+canvas.width = img.width / 4;
+canvas.height = img.height / 4;
+ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+```
+
+The image is scaled down to 25% of its original size for performance optimization.
+
+<ResponseField name="Performance Impact">
+  Downscaling by 4x reduces pixel count by 16x, significantly improving processing speed
+</ResponseField>
+
+### Step 3: Pixel Data Extraction
+
+```javascript
+const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+```
+
+Returns a `Uint8ClampedArray` with RGBA values:
+
+```javascript
+[R, G, B, A, R, G, B, A, R, G, B, A, ...]
+```
+
+### Step 4: Color Frequency Analysis
+
+```javascript
+for (let i = 0; i < data.length; i += 16) {
+  const r = data[i];
+  const g = data[i+1];
+  const b = data[i+2];
+
+  if (r+g+b < 60 || r+g+b > 720) continue;
+
+  const rgb = `${r},${g},${b}`;
+  colors[rgb] = (colors[rgb] || 0) + 1;
+
+  if (colors[rgb] > max) {
+    max = colors[rgb];
+    dominant = rgb;
+  }
+}
+```
+
+<ParamField path="Sampling Strategy">
+  Analyzes every 4th pixel (`i += 16`, since each pixel = 4 values) to improve performance
+</ParamField>
+
+<ParamField path="Brightness Filter">
+  Excludes colors that are too dark (`r+g+b < 60`) or too bright (`r+g+b > 720`)
+</ParamField>
+
+#### Brightness Filter Thresholds
+
+| Condition | RGB Sum | Purpose |
+|-----------|---------|----------|
+| Too Dark | < 60 | Excludes near-black colors |
+| Too Bright | > 720 | Excludes near-white colors |
+| Valid Range | 60-720 | Ensures vibrant, visible colors |
+
+### Step 5: Apply Background
+
+```javascript
+element.style.background = `rgba(${dominant}, 0.35)`;
+```
+
+Applies the dominant color with 35% opacity for a subtle effect.
+
+## Usage Examples
+
+<CodeGroup>
+
+```javascript Mouse Hover
+div.addEventListener("mouseenter", () => 
+  detectarColor(song.thumbnail, div)
+);
+
+div.addEventListener("mouseleave", () => 
+  div.style.background = ""
+);
+```
+
+```javascript Direct Call
+const songElement = document.querySelector(".song");
+const thumbnailURL = "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg";
+
+detectarColor(thumbnailURL, songElement);
+```
+
+```javascript With Custom Element
+const customDiv = document.createElement("div");
+customDiv.className = "custom-card";
+
+detectarColor("https://example.com/image.jpg", customDiv);
+```
+
+</CodeGroup>
+
+## Canvas API Methods Used
+
+### drawImage()
+
+```javascript
+ctx.drawImage(img, dx, dy, dWidth, dHeight)
+```
+
+<ParamField path="img" type="Image">
+  Source image object
+</ParamField>
+
+<ParamField path="dx, dy" type="number">
+  Destination x,y coordinates (0, 0)
+</ParamField>
+
+<ParamField path="dWidth, dHeight" type="number">
+  Destination dimensions (scaled down)
+</ParamField>
+
+### getImageData()
+
+```javascript
+ctx.getImageData(sx, sy, sw, sh)
+```
+
+<ParamField path="sx, sy" type="number">
+  Source x,y coordinates
+</ParamField>
+
+<ParamField path="sw, sh" type="number">
+  Source width and height
+</ParamField>
+
+<ResponseField name="return" type="ImageData">
+  Object containing pixel data in RGBA format
+</ResponseField>
+
+## Performance Considerations
+
+<Card title="Optimization Techniques" icon="bolt">
+  1. **Image Downscaling**: Reduces image to 25% size (16x fewer pixels)
+  2. **Pixel Sampling**: Analyzes every 4th pixel instead of all pixels
+  3. **Brightness Filtering**: Skips very dark/bright pixels early
+  4. **Lazy Loading**: Only processes on hover, not on initial render
+</Card>
+
+## CORS Considerations
+
+<Warning>
+External images must support CORS for this function to work. The thumbnail server must include appropriate CORS headers:
+
+```
+Access-Control-Allow-Origin: *
+```
+</Warning>
+
+### Troubleshooting CORS Errors
+
+If you encounter `SecurityError: The operation is insecure`:
+
+1. Verify the image server allows CORS
+2. Ensure `crossOrigin = "anonymous"` is set before `img.src`
+3. Consider using a CORS proxy for images from restricted sources
+
+## Visual Effect Result
+
+The function produces a dynamic hover effect:
+
+```css
+/* Before hover */
+.song {
+  background: transparent;
+}
+
+/* After hover (applied dynamically) */
+.song {
+  background: rgba(234, 67, 89, 0.35); /* Dominant color with 35% opacity */
+}
+```
+
+## HTML Canvas Element
+
+```html index.html
+<canvas id="canvas" class="hidden"></canvas>
+```
+
+<Note>
+The canvas is hidden but remains in the DOM for image processing operations.
+</Note>

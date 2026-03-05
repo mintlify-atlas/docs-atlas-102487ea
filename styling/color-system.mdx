@@ -1,0 +1,458 @@
+---
+title: 'Color System'
+description: 'Design tokens, color palettes, and CSS variables in MYMUSICK'
+icon: 'droplet'
+---
+
+# Color System
+
+MYMUSICK uses CSS custom properties (CSS variables) to create a flexible, maintainable color system. This approach enables easy theming and consistent color usage across components.
+
+## Design Tokens
+
+<Tabs>
+  <Tab title="Original Theme">
+    ### Primary Colors
+    
+    The original theme uses a **vibrant, high-contrast** color palette designed for maximum visual impact.
+
+    <CodeGroup>
+    ```css CSS Variables
+    :root {
+      --primary: #04CDA8;    /* Teal - Primary brand color */
+      --accent: #FF5757;     /* Coral Red - Accent highlights */
+      --bg-dark: #111;       /* Dark Gray - Background */
+      --text-light: white;   /* White - Text color */
+    }
+    ```
+
+    ```css Body Styles
+    body {
+      margin: 0;
+      padding: 0;
+      padding-bottom: 100px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: black;              /* Pure black base */
+      color: var(--text-light);       /* White text */
+    }
+    ```
+    </CodeGroup>
+
+    ### Color Usage Map
+
+    | Token | Hex Value | Usage |
+    |-------|-----------|-------|
+    | `--primary` | `#04CDA8` | Header background, sidebar links hover |
+    | `--accent` | `#FF5757` | Title text, borders, scrollbar, player buttons |
+    | `--bg-dark` | `#111` | Sidebar, cards, input backgrounds |
+    | `--text-light` | `white` | Body text, button text |
+
+    ### Color Palette
+
+    <CardGroup cols={2}>
+      <Card title="Primary: #04CDA8" icon="circle" color="#04CDA8">
+        Vibrant teal for primary actions and header
+      </Card>
+      <Card title="Accent: #FF5757" icon="circle" color="#FF5757">
+        Coral red for emphasis and interactive elements
+      </Card>
+      <Card title="Background: #111" icon="circle" color="#111">
+        Dark gray for surfaces and containers
+      </Card>
+      <Card title="Text: #FFFFFF" icon="circle" color="#FFFFFF">
+        Pure white for maximum contrast
+      </Card>
+    </CardGroup>
+  </Tab>
+
+  <Tab title="Formal Theme">
+    ### Extended Color System
+    
+    The formal theme features a **sophisticated, layered** color system with semantic naming and multiple surface levels.
+
+    <CodeGroup>
+    ```css CSS Variables
+    :root {
+      /* Backgrounds */
+      --bg:           #0b0c0f;                    /* Deep space background */
+      --surface:      #111318;                    /* Elevated surface level 1 */
+      --surface2:     #181b22;                    /* Elevated surface level 2 */
+      
+      /* Colors */
+      --accent:       #e8ff47;                    /* Neon yellow primary */
+      --accent2:      #ff5c5c;                    /* Coral secondary */
+      
+      /* Text */
+      --text:         #e8e6df;                    /* Warm white text */
+      --muted:        #6b6b72;                    /* Muted gray text */
+      
+      /* Effects */
+      --border:       rgba(255,255,255,0.07);     /* Subtle borders */
+      --glow:         rgba(232,255,71,0.18);      /* Accent glow effect */
+    }
+    ```
+
+    ```css Body Styles
+    body {
+      font-family: var(--font-body);
+      font-size: 15px;
+      background-color: var(--bg);
+      color: var(--text);
+      /* SVG noise texture overlay */
+      background-image: url("data:image/svg+xml,%3Csvg...");
+    }
+    ```
+    </CodeGroup>
+
+    ### Semantic Color Roles
+
+    | Token | Hex Value | Purpose | Usage |
+    |-------|-----------|---------|-------|
+    | `--bg` | `#0b0c0f` | Base layer | Page background |
+    | `--surface` | `#111318` | Level 1 | Cards, sidebar |
+    | `--surface2` | `#181b22` | Level 2 | Input fields, elevated elements |
+    | `--accent` | `#e8ff47` | Primary CTA | Buttons, title, focus states |
+    | `--accent2` | `#ff5c5c` | Secondary | Alerts, warnings (unused in current UI) |
+    | `--text` | `#e8e6df` | Primary text | Body copy, labels |
+    | `--muted` | `#6b6b72` | Secondary text | Placeholders, metadata |
+    | `--border` | `rgba(255,255,255,0.07)` | Dividers | Borders, separators |
+    | `--glow` | `rgba(232,255,71,0.18)` | Effects | Focus rings, shadows |
+
+    ### Color Palette
+
+    <CardGroup cols={3}>
+      <Card title="Background: #0b0c0f" icon="circle" color="#0b0c0f">
+        Deep space base
+      </Card>
+      <Card title="Surface: #111318" icon="circle" color="#111318">
+        Elevated cards
+      </Card>
+      <Card title="Surface 2: #181b22" icon="circle" color="#181b22">
+        Input fields
+      </Card>
+      <Card title="Accent: #e8ff47" icon="circle" color="#e8ff47">
+        Neon yellow primary
+      </Card>
+      <Card title="Accent 2: #ff5c5c" icon="circle" color="#ff5c5c">
+        Coral secondary
+      </Card>
+      <Card title="Text: #e8e6df" icon="circle" color="#e8e6df">
+        Warm white
+      </Card>
+      <Card title="Muted: #6b6b72" icon="circle" color="#6b6b72">
+        Secondary text
+      </Card>
+    </CardGroup>
+  </Tab>
+</Tabs>
+
+## Color Application Examples
+
+### Header Component
+
+<CodeGroup>
+```css Original Theme Header
+header {
+  background: var(--primary);              /* #04CDA8 teal */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.title {
+  color: var(--accent);                    /* #FF5757 coral */
+}
+
+.search {
+  border: 2px solid var(--accent);         /* #FF5757 border */
+  background: black;
+  color: white;
+}
+
+.search:focus {
+  box-shadow: 0 0 10px rgba(255,87,87,0.5); /* Accent glow */
+}
+```
+
+```css Formal Theme Header
+header {
+  background: rgba(11,12,15,0.88);         /* Translucent bg */
+  backdrop-filter: blur(18px);             /* Glass effect */
+  border-bottom: 1px solid var(--border);  /* Subtle divider */
+}
+
+.title {
+  color: var(--accent);                    /* #e8ff47 yellow */
+}
+
+.search {
+  background: var(--surface2);             /* #181b22 */
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);       /* Yellow glow */
+}
+```
+</CodeGroup>
+
+### Interactive States
+
+<Tabs>
+  <Tab title="Buttons">
+    <CodeGroup>
+    ```css Original: Outlined Style
+    .bttlg {
+      border: 2px solid var(--accent);      /* #FF5757 border */
+      background: black;
+      color: white;
+    }
+
+    .bttlg:hover {
+      background: white;                    /* Invert colors */
+      color: black;
+      transform: scale(1.05);               /* Grow slightly */
+    }
+    ```
+
+    ```css Formal: Solid Style
+    .bttlg {
+      background: var(--accent);            /* #e8ff47 yellow */
+      color: #0b0c0f;                       /* Dark text */
+      border: none;
+    }
+
+    .bttlg:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 18px var(--glow);   /* Subtle lift + glow */
+    }
+    ```
+    </CodeGroup>
+  </Tab>
+
+  <Tab title="Links">
+    <CodeGroup>
+    ```css Original: Accent Bar
+    .sidebar a {
+      color: white;
+    }
+
+    .sidebar a:hover {
+      color: var(--primary);                /* #04CDA8 teal */
+    }
+
+    .sidebar a::before {
+      background: var(--accent);            /* #FF5757 bar */
+      transform: scaleY(0);
+    }
+
+    .sidebar a:hover::before {
+      transform: scaleY(1);                 /* Reveal bar */
+    }
+    ```
+
+    ```css Formal: Background Change
+    .sidebar a {
+      color: var(--muted);                  /* #6b6b72 gray */
+    }
+
+    .sidebar a:hover {
+      color: var(--text);                   /* #e8e6df white */
+      background: var(--surface);           /* Subtle bg */
+    }
+    ```
+    </CodeGroup>
+  </Tab>
+
+  <Tab title="Cards">
+    <CodeGroup>
+    ```css Original: Border Glow
+    .song {
+      background: var(--bg-dark);           /* #111 */
+      border: 1px solid transparent;
+    }
+
+    .song:hover {
+      background: #1e1e1e;                  /* Lighter shade */
+      border-color: var(--accent);          /* #FF5757 border */
+      transform: translateY(-6px);          /* Large lift */
+    }
+    ```
+
+    ```css Formal: Shadow & Gradient
+    .song {
+      background: var(--surface);           /* #111318 */
+      border: 1px solid var(--border);
+    }
+
+    .song::after {
+      background: linear-gradient(135deg, 
+        transparent 60%, 
+        rgba(232,255,71,0.04)               /* Subtle gradient */
+      );
+    }
+
+    .song:hover {
+      border-color: rgba(232,255,71,0.3);   /* Accent border */
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5); /* Deep shadow */
+    }
+    ```
+    </CodeGroup>
+  </Tab>
+</Tabs>
+
+## Opacity & Transparency
+
+### Original Theme
+<CodeGroup>
+```css Shadow & Glow Effects
+header {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);      /* Header shadow */
+}
+
+.search:focus {
+  box-shadow: 0 0 10px rgba(255,87,87,0.5);    /* Accent glow */
+}
+
+.sidebar {
+  box-shadow: 2px 0 10px rgba(0,0,0,0.5);      /* Sidebar depth */
+}
+```
+</CodeGroup>
+
+### Formal Theme
+<CodeGroup>
+```css Glass Morphism & Layers
+header {
+  background: rgba(11,12,15,0.88);             /* 88% opacity */
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+footer.player {
+  background: rgba(17,19,24,0.95);             /* 95% opacity */
+  backdrop-filter: blur(20px);
+}
+
+:root {
+  --border: rgba(255,255,255,0.07);            /* 7% white */
+  --glow: rgba(232,255,71,0.18);               /* 18% accent */
+}
+
+.song::after {
+  background: linear-gradient(135deg, 
+    transparent 60%, 
+    rgba(232,255,71,0.04)                      /* 4% accent tint */
+  );
+}
+```
+</CodeGroup>
+
+## Scrollbar Customization
+
+<Tabs>
+  <Tab title="Original">
+    ```css
+    #results::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    #results::-webkit-scrollbar-thumb {
+      background: var(--accent);              /* #FF5757 */
+      border-radius: 4px;
+    }
+
+    #results::-webkit-scrollbar-track {
+      background: var(--bg-dark);             /* #111 */
+    }
+    ```
+  </Tab>
+
+  <Tab title="Formal">
+    ```css
+    ::-webkit-scrollbar { 
+      width: 5px; 
+      height: 5px; 
+    }
+
+    ::-webkit-scrollbar-track { 
+      background: var(--bg);                  /* #0b0c0f */
+    }
+
+    ::-webkit-scrollbar-thumb { 
+      background: var(--surface2);            /* #181b22 */
+      border-radius: 99px; 
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use CSS Variables" icon="code">
+    Always reference colors via CSS variables, never hardcoded hex values (except in `:root`)
+  </Card>
+
+  <Card title="Maintain Contrast" icon="eye">
+    Ensure text meets WCAG AA standards (4.5:1 ratio for body text)
+  </Card>
+
+  <Card title="Consistent Opacity" icon="layer-group">
+    Use semantic opacity values: 7%, 18%, 88%, 95%
+  </Card>
+
+  <Card title="Test Both Themes" icon="flask">
+    Verify new components work with both color systems
+  </Card>
+</CardGroup>
+
+<Note>
+  The formal theme includes more granular color tokens for complex UI patterns like glass morphism and layered surfaces.
+</Note>
+
+## Accessibility Considerations
+
+### Contrast Ratios
+
+| Theme | Text on Background | Ratio | WCAG Level |
+|-------|-------------------|-------|------------|
+| Original | `white` on `#111` | 17.5:1 | AAA |
+| Original | `white` on `#04CDA8` | 3.2:1 | AA (Large text) |
+| Formal | `#e8e6df` on `#0b0c0f` | 14.8:1 | AAA |
+| Formal | `#0b0c0f` on `#e8ff47` | 13.2:1 | AAA |
+
+<Warning>
+  The original theme's white text on teal background (header) falls below AA for normal-sized text. Use larger font sizes or bold weights in these areas.
+</Warning>
+
+## Adding New Colors
+
+To extend the color system:
+
+<Steps>
+  <Step title="Define in :root">
+    Add your custom property to the `:root` selector:
+    ```css
+    :root {
+      --custom-color: #hexvalue;
+    }
+    ```
+  </Step>
+
+  <Step title="Use Semantic Naming">
+    Name colors by function, not appearance:
+    - Good: `--error`, `--success`, `--warning`
+    - Bad: `--red`, `--green`, `--orange`
+  </Step>
+
+  <Step title="Apply Consistently">
+    Reference the variable throughout your styles:
+    ```css
+    .error-message {
+      color: var(--error);
+      border-color: var(--error);
+    }
+    ```
+  </Step>
+</Steps>

@@ -1,0 +1,651 @@
+---
+title: Customization Guide
+description: Learn how to customize themes, add features, and modify MYMUSICK
+icon: "palette"
+---
+
+## Theme Customization
+
+MYMUSICK includes two built-in themes that can be easily switched and customized.
+
+### Switching Themes
+
+Change the stylesheet reference in `index.html:11`:
+
+<CodeGroup>
+```html Original Theme
+<link rel="stylesheet" href="estilooriginal.css">
+```
+
+```html Formal Theme
+<link rel="stylesheet" href="estiloformal2.css">
+```
+</CodeGroup>
+
+### Creating Custom Themes
+
+<Steps>
+  <Step title="Create new stylesheet">
+    Copy one of the existing themes as a starting point:
+    ```bash
+    cp estilooriginal.css my-custom-theme.css
+    ```
+  </Step>
+
+  <Step title="Customize CSS variables">
+    Both themes use CSS custom properties for easy customization:
+
+    <CodeGroup>
+    ```css Original Theme Variables
+    :root {
+      --primary: #04CDA8;    /* Main brand color */
+      --accent: #FF5757;     /* Accent color */
+      --bg-dark: #111;       /* Background */
+      --text-light: white;   /* Text color */
+    }
+    ```
+
+    ```css Formal Theme Variables
+    :root {
+      --bg: #0b0c0f;              /* Base background */
+      --surface: #111318;         /* Card/surface color */
+      --surface2: #181b22;        /* Secondary surface */
+      --border: rgba(255,255,255,0.07);  /* Border color */
+      --accent: #e8ff47;          /* Primary accent */
+      --accent2: #ff5c5c;         /* Secondary accent */
+      --text: #e8e6df;            /* Text color */
+      --muted: #6b6b72;           /* Muted text */
+      --glow: rgba(232,255,71,0.18);     /* Glow effect */
+    }
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Update typography">
+    Change fonts to match your brand:
+
+    <CodeGroup>
+    ```css Custom Font Import
+    @import url('https://fonts.googleapis.com/css2?family=Your+Font+Here');
+
+    :root {
+      --font-display: 'Your Display Font', sans-serif;
+      --font-body: 'Your Body Font', sans-serif;
+    }
+    ```
+
+    ```css Local Font
+    @font-face {
+      font-family: 'MyCustomFont';
+      src: url("fonts/mycustomfont.woff2") format("woff2");
+      font-weight: normal;
+      font-style: normal;
+    }
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Link your theme">
+    Update `index.html`:
+    ```html
+    <link rel="stylesheet" href="my-custom-theme.css">
+    ```
+  </Step>
+</Steps>
+
+### Theme Examples
+
+<Tabs>
+  <Tab title="Neon Cyberpunk">
+    ```css
+    :root {
+      --primary: #ff00ff;     /* Magenta */
+      --accent: #00ffff;      /* Cyan */
+      --bg-dark: #0a0a0a;     /* Deep black */
+      --text-light: #ffffff;
+    }
+
+    body {
+      background: linear-gradient(180deg, #0a0a0a 0%, #1a0a1a 100%);
+      text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+    }
+
+    .song:hover {
+      box-shadow: 0 0 20px var(--primary),
+                  0 0 40px var(--accent);
+    }
+    ```
+  </Tab>
+
+  <Tab title="Minimalist Light">
+    ```css
+    :root {
+      --primary: #000000;     /* Black */
+      --accent: #666666;      /* Gray */
+      --bg-dark: #ffffff;     /* White */
+      --text-light: #000000;
+    }
+
+    body {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .song {
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+    }
+
+    .song:hover {
+      background: #eeeeee;
+      border-color: #000000;
+    }
+    ```
+  </Tab>
+
+  <Tab title="Retro Vinyl">
+    ```css
+    :root {
+      --primary: #f4a261;     /* Warm orange */
+      --accent: #e76f51;      /* Rust red */
+      --bg-dark: #264653;     /* Deep teal */
+      --text-light: #e9c46a;  /* Cream */
+    }
+
+    body {
+      background: linear-gradient(135deg, #264653 0%, #2a9d8f 100%);
+      font-family: 'Courier New', monospace;
+    }
+
+    .song {
+      background: rgba(244, 162, 97, 0.1);
+      border: 2px solid var(--accent);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Component Customization
+
+### Modify Search Behavior
+
+#### Change Search Trigger
+
+By default, search triggers on Enter key. To add instant search:
+
+```javascript
+// Replace the keydown listener (index.html:113)
+input.addEventListener("input", debounce(async (e) => {
+  const query = input.value.trim();
+  if (query.length < 3) return; // Minimum 3 characters
+  
+  results.innerHTML = `<p>Buscando... 🎵</p>`;
+  
+  try {
+    const res = await fetch(
+      `https://mymusick-backend.onrender.com/search?q=${encodeURIComponent(query)}`
+    );
+    const songs = await res.json();
+    renderSongs(songs);
+  } catch {
+    results.innerHTML = `<p>Error al buscar 😕</p>`;
+  }
+}, 500)); // 500ms debounce
+
+// Add debounce helper function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+```
+
+#### Add Search Filters
+
+```javascript
+// Add filter buttons to HTML
+<div class="filters">
+  <button data-filter="all" class="active">Todos</button>
+  <button data-filter="song">Canciones</button>
+  <button data-filter="artist">Artistas</button>
+  <button data-filter="album">Álbumes</button>
+</div>
+
+// Add filter functionality
+let currentFilter = 'all';
+
+document.querySelectorAll('[data-filter]').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    currentFilter = e.target.dataset.filter;
+    document.querySelectorAll('[data-filter]').forEach(b => 
+      b.classList.remove('active')
+    );
+    e.target.classList.add('active');
+    
+    // Re-run search with filter
+    if (input.value.trim()) {
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    }
+  });
+});
+
+// Modify fetch to include filter
+const res = await fetch(
+  `https://mymusick-backend.onrender.com/search?q=${encodeURIComponent(query)}&type=${currentFilter}`
+);
+```
+
+### Customize Song Cards
+
+#### Add Duration Display
+
+```javascript
+// Modify renderSongs function (index.html:152)
+div.innerHTML = `
+  <img src="${song.thumbnail}" 
+       alt="Portada de ${song.title}"
+       loading="lazy"
+       crossorigin="anonymous">
+  <div class="song-info">
+    <strong>${song.title}</strong>
+    <small>${song.artist}</small>
+    <span class="duration">${formatDuration(song.duration)}</span>
+  </div>
+`;
+
+// Add duration formatter
+function formatDuration(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+```
+
+```css
+/* Add styling */
+.duration {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  display: block;
+}
+```
+
+#### Add Favorite Button
+
+```javascript
+// Add to song card HTML
+div.innerHTML = `
+  <img src="${song.thumbnail}" ...>
+  <div class="song-info">
+    <strong>${song.title}</strong>
+    <small>${song.artist}</small>
+  </div>
+  <button class="favorite-btn" data-id="${song.id}" 
+          onclick="toggleFavorite(event, '${song.id}')">
+    ${isFavorite(song.id) ? '❤️' : '🤍'}
+  </button>
+`;
+
+// Favorite management
+function toggleFavorite(event, songId) {
+  event.stopPropagation(); // Prevent song from playing
+  
+  const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+  const index = favorites.indexOf(songId);
+  
+  if (index > -1) {
+    favorites.splice(index, 1);
+  } else {
+    favorites.push(songId);
+  }
+  
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+  event.target.textContent = isFavorite(songId) ? '❤️' : '🤍';
+}
+
+function isFavorite(songId) {
+  const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+  return favorites.includes(songId);
+}
+```
+
+### Enhanced Player Controls
+
+#### Add Volume Control
+
+```html
+<!-- Add to footer.player -->
+<div class="volume-control">
+  <span>🔊</span>
+  <input type="range" id="volumeSlider" min="0" max="100" value="100">
+</div>
+```
+
+```javascript
+const volumeSlider = document.getElementById('volumeSlider');
+
+volumeSlider.addEventListener('input', (e) => {
+  if (player && player.setVolume) {
+    player.setVolume(e.target.value);
+  }
+});
+```
+
+```css
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#volumeSlider {
+  width: 100px;
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+}
+```
+
+#### Add Progress Bar
+
+```html
+<div class="progress-bar" id="progressBar">
+  <div class="progress-fill" id="progressFill"></div>
+  <div class="progress-time">
+    <span id="currentTime">0:00</span>
+    <span id="totalTime">0:00</span>
+  </div>
+</div>
+```
+
+```javascript
+let progressInterval;
+
+function updateProgress() {
+  if (!player || !player.getDuration) return;
+  
+  const current = player.getCurrentTime();
+  const total = player.getDuration();
+  const percentage = (current / total) * 100;
+  
+  document.getElementById('progressFill').style.width = `${percentage}%`;
+  document.getElementById('currentTime').textContent = formatTime(current);
+  document.getElementById('totalTime').textContent = formatTime(total);
+}
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Start updating progress when playing
+function onPlayerStateChange(event) {
+  isPlaying = event.data === YT.PlayerState.PLAYING;
+  
+  if (isPlaying) {
+    progressInterval = setInterval(updateProgress, 1000);
+  } else {
+    clearInterval(progressInterval);
+  }
+  
+  playPauseBtn.classList.remove("hidden");
+  playPauseBtn.textContent = isPlaying ? "⏸️ Pausar" : "▶️ Reproducir";
+}
+```
+
+## Backend Customization
+
+### Using a Custom Backend
+
+Replace the backend URL to use your own API:
+
+```javascript
+// Add configuration object
+const CONFIG = {
+  API_BASE_URL: 'https://your-backend.com',
+  ENDPOINTS: {
+    search: '/api/v1/search',
+    trending: '/api/v1/trending',
+    playlist: '/api/v1/playlist'
+  }
+};
+
+// Update search function
+const res = await fetch(
+  `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.search}?q=${encodeURIComponent(query)}`
+);
+```
+
+### Expected Backend Response Format
+
+<CodeGroup>
+```json Search Response
+[
+  {
+    "id": "dQw4w9WgXcQ",
+    "title": "Never Gonna Give You Up",
+    "artist": "Rick Astley",
+    "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+    "duration": 213
+  }
+]
+```
+
+```json Error Response
+{
+  "error": "No results found",
+  "code": "NO_RESULTS",
+  "query": "asdfghjkl"
+}
+```
+</CodeGroup>
+
+<Warning>
+  Make sure your backend supports CORS and returns proper headers:
+  ```
+  Access-Control-Allow-Origin: *
+  Content-Type: application/json
+  ```
+</Warning>
+
+### Add Caching Layer
+
+```javascript
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+async function searchWithCache(query) {
+  const cacheKey = `search_${query}`;
+  const cached = cache.get(cacheKey);
+  
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  
+  const res = await fetch(
+    `https://mymusick-backend.onrender.com/search?q=${encodeURIComponent(query)}`
+  );
+  const data = await res.json();
+  
+  cache.set(cacheKey, {
+    data,
+    timestamp: Date.now()
+  });
+  
+  return data;
+}
+
+// Use in search handler
+input.addEventListener("keydown", async (e) => {
+  if (e.key !== "Enter") return;
+  
+  const query = input.value.trim();
+  if (!query) return;
+  
+  results.innerHTML = `<p>Buscando... 🎵</p>`;
+  
+  try {
+    const songs = await searchWithCache(query);
+    renderSongs(songs);
+  } catch {
+    results.innerHTML = `<p>Error al buscar 😕</p>`;
+  }
+});
+```
+
+## Advanced Features
+
+### Add Playlist Support
+
+```javascript
+let playlist = [];
+let currentSongIndex = 0;
+
+function addToPlaylist(song) {
+  playlist.push(song);
+  updatePlaylistUI();
+}
+
+function playNext() {
+  if (currentSongIndex < playlist.length - 1) {
+    currentSongIndex++;
+    loadSong(playlist[currentSongIndex]);
+  }
+}
+
+function playPrevious() {
+  if (currentSongIndex > 0) {
+    currentSongIndex--;
+    loadSong(playlist[currentSongIndex]);
+  }
+}
+
+// Auto-play next song when current ends
+function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.ENDED) {
+    playNext();
+  }
+  // ... rest of existing code
+}
+```
+
+### Add Keyboard Shortcuts
+
+```javascript
+document.addEventListener('keydown', (e) => {
+  // Space: Play/Pause
+  if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+    e.preventDefault();
+    togglePlayPause();
+  }
+  
+  // Arrow Right: Next song
+  if (e.code === 'ArrowRight' && playlist.length > 0) {
+    playNext();
+  }
+  
+  // Arrow Left: Previous song
+  if (e.code === 'ArrowLeft' && playlist.length > 0) {
+    playPrevious();
+  }
+  
+  // Arrow Up: Volume up
+  if (e.code === 'ArrowUp' && player) {
+    e.preventDefault();
+    const currentVol = player.getVolume();
+    player.setVolume(Math.min(100, currentVol + 10));
+  }
+  
+  // Arrow Down: Volume down
+  if (e.code === 'ArrowDown' && player) {
+    e.preventDefault();
+    const currentVol = player.getVolume();
+    player.setVolume(Math.max(0, currentVol - 10));
+  }
+});
+```
+
+### Add Analytics Tracking
+
+```javascript
+function trackEvent(category, action, label) {
+  // Google Analytics
+  if (window.gtag) {
+    gtag('event', action, {
+      'event_category': category,
+      'event_label': label
+    });
+  }
+  
+  // Or custom analytics
+  fetch('https://your-analytics.com/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category, action, label })
+  });
+}
+
+// Track searches
+input.addEventListener("keydown", async (e) => {
+  if (e.key !== "Enter") return;
+  const query = input.value.trim();
+  trackEvent('Search', 'query', query);
+  // ... rest of search code
+});
+
+// Track song plays
+function loadSong(song) {
+  trackEvent('Player', 'play', song.title);
+  // ... rest of loadSong code
+}
+```
+
+## Testing Your Customizations
+
+<Steps>
+  <Step title="Test in multiple browsers">
+    Ensure compatibility with Chrome, Firefox, Safari, and Edge
+  </Step>
+  
+  <Step title="Test responsive design">
+    Use browser DevTools to test mobile layouts (320px, 768px, 1024px)
+  </Step>
+  
+  <Step title="Test API failures">
+    Simulate network errors to ensure graceful degradation
+  </Step>
+  
+  <Step title="Test keyboard navigation">
+    Verify all interactive elements work with keyboard only
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Setup" icon="wrench" href="/development/setup">
+    Review development environment setup
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/development/architecture">
+    Deep dive into application architecture
+  </Card>
+</CardGroup>

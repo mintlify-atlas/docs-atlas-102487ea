@@ -1,0 +1,365 @@
+---
+title: 'Themes'
+description: 'Compare and switch between MYMUSICK theme variants'
+icon: 'palette'
+---
+
+# Theme System
+
+MYMUSICK includes two distinct visual themes, each with its own design philosophy and use case. Both themes share the same component structure but differ in color schemes, typography, and overall aesthetic.
+
+<CardGroup cols={2}>
+  <Card title="Original Theme" icon="music" color="#04CDA8">
+    Bold, vibrant design with Gyanko custom font
+  </Card>
+  <Card title="Formal Theme" icon="building" color="#e8ff47">
+    Modern, sophisticated late-night vinyl lounge aesthetic
+  </Card>
+</CardGroup>
+
+## Theme Comparison
+
+<Tabs>
+  <Tab title="Original Theme">
+    ### Design Philosophy
+    The original theme (`estilooriginal.css`) features a **bold, energetic aesthetic** designed for music enthusiasts who want a vibrant, eye-catching interface.
+
+    ### Key Characteristics
+    - **Custom Typography**: Gyanko font for brand identity
+    - **High Contrast**: Bright accent colors against dark backgrounds
+    - **Playful Interactions**: Scale transforms and bold hover effects
+    - **Compact Layout**: Sidebar-focused navigation
+
+    ### Color Palette
+    <CodeGroup>
+    ```css CSS Variables
+    :root {
+      --primary: #04CDA8;    /* Teal primary */
+      --accent: #FF5757;     /* Coral accent */
+      --bg-dark: #111;       /* Dark background */
+      --text-light: white;   /* Light text */
+    }
+    ```
+    </CodeGroup>
+
+    ### Typography Stack
+    ```css
+    @font-face {
+      font-family: 'Gyanko';
+      src: url("fonts/gyanko-regular.otf") format("opentype");
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .title, .bttlg, .sidebar a {
+      font-family: 'Gyanko', sans-serif;
+    }
+    ```
+
+    ### Layout Specifications
+    - **Header Height**: 150px minimum
+    - **Sidebar Width**: 170px fixed
+    - **Player Height**: 80px fixed
+    - **Border Radius**: 15px-25px (rounded)
+  </Tab>
+
+  <Tab title="Formal Theme">
+    ### Design Philosophy
+    The formal theme (`estiloformal2.css`) embodies a **late-night vinyl lounge** aesthetic with sophisticated design patterns and modern web technologies.
+
+    ### Key Characteristics
+    - **Professional Typography**: Bebas Neue (display) + DM Sans (body)
+    - **Subtle Interactions**: Glass morphism and smooth transitions
+    - **Modern Layout**: CSS Grid for responsive cards
+    - **Texture & Depth**: SVG noise texture overlay
+
+    ### Color Palette
+    <CodeGroup>
+    ```css CSS Variables
+    :root {
+      --bg:           #0b0c0f;                    /* Deep background */
+      --surface:      #111318;                    /* Card surface */
+      --surface2:     #181b22;                    /* Elevated surface */
+      --border:       rgba(255,255,255,0.07);     /* Subtle border */
+      --accent:       #e8ff47;                    /* Neon yellow accent */
+      --accent2:      #ff5c5c;                    /* Secondary coral */
+      --text:         #e8e6df;                    /* Warm text */
+      --muted:        #6b6b72;                    /* Muted text */
+      --glow:         rgba(232,255,71,0.18);      /* Accent glow */
+    }
+    ```
+    </CodeGroup>
+
+    ### Typography Stack
+    ```css
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+    :root {
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 15px;
+    }
+
+    .title, .intxt, .login-form h3 {
+      font-family: var(--font-display);
+    }
+    ```
+
+    ### Layout Specifications
+    - **Header Height**: 68px (compact)
+    - **Sidebar Width**: 220px with fixed positioning
+    - **Player Height**: 90px
+    - **Border Radius**: 8px-40px (context-dependent)
+
+    ### Advanced Features
+    ```css
+    /* Glass morphism header */
+    header {
+      background: rgba(11,12,15,0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    /* SVG noise texture */
+    body {
+      background-image: url("data:image/svg+xml,%3Csvg...");
+    }
+
+    /* Smooth animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Component Style Differences
+
+### Header Styles
+
+<CodeGroup>
+```css Original Theme
+header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  min-height: 150px;
+  padding: 0 20px;
+  background: var(--primary);  /* Solid teal */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.title {
+  font-family: 'Gyanko', sans-serif;
+  font-size: 40px;
+  letter-spacing: 2px;
+  color: var(--accent);  /* #FF5757 */
+}
+```
+
+```css Formal Theme
+header {
+  position: fixed;
+  height: var(--header-h);
+  background: rgba(11,12,15,0.88);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: var(--accent);  /* #e8ff47 */
+}
+```
+</CodeGroup>
+
+### Button Styles
+
+<CodeGroup>
+```css Original Theme
+.bttlg {
+  width: 120px;
+  height: 40px;
+  border-radius: 25px;
+  border: 2px solid var(--accent);
+  background: black;
+  color: white;
+  font-family: 'Gyanko', sans-serif;
+}
+
+.bttlg:hover {
+  background: white;
+  color: black;
+  transform: scale(1.05);
+}
+```
+
+```css Formal Theme
+.bttlg {
+  background: var(--accent);
+  color: #0b0c0f;
+  border: none;
+  border-radius: 40px;
+  padding: 9px 22px;
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+.bttlg:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px var(--glow);
+}
+```
+</CodeGroup>
+
+### Song Card Styles
+
+<CodeGroup>
+```css Original Theme
+.song {
+  min-width: 160px;
+  padding: 12px;
+  background: var(--bg-dark);
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.song:hover {
+  background: #1e1e1e;
+  border-color: var(--accent);
+  transform: translateY(-6px);
+}
+```
+
+```css Formal Theme
+.song {
+  padding: 14px;
+  background: var(--surface);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: row;  /* Horizontal layout */
+  align-items: center;
+  gap: 14px;
+  animation: fadeUp .4s ease both;
+}
+
+.song:hover {
+  transform: translateY(-3px);
+  border-color: rgba(232,255,71,0.3);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+}
+```
+</CodeGroup>
+
+## Responsive Behavior
+
+<Tabs>
+  <Tab title="Original">
+    ```css
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      #results {
+        margin-left: 0;
+        padding: 10px;
+      }
+
+      .title {
+        font-size: 28px;
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Formal">
+    ```css
+    @media (max-width: 768px) {
+      :root {
+        --sidebar-w: 0px;
+        --header-h: 120px;
+      }
+
+      header {
+        flex-direction: column;
+        height: auto;
+        padding: 16px 20px;
+      }
+
+      #results {
+        grid-template-columns: 1fr;
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Switching Themes
+
+<Steps>
+  <Step title="Update HTML Link">
+    Change the CSS file reference in your HTML:
+    ```html
+    <!-- Original Theme -->
+    <link rel="stylesheet" href="estilooriginal.css">
+
+    <!-- Formal Theme -->
+    <link rel="stylesheet" href="estiloformal2.css">
+    ```
+  </Step>
+
+  <Step title="No Code Changes Required">
+    Both themes use the same HTML structure and class names, so no JavaScript or markup changes are needed.
+  </Step>
+
+  <Step title="Verify Font Loading">
+    - **Original**: Ensure `fonts/gyanko-regular.otf` is available
+    - **Formal**: Google Fonts loads automatically
+  </Step>
+</Steps>
+
+<Note>
+  Both themes maintain identical functionality and component structure. The only differences are visual styling, color schemes, and typography.
+</Note>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use Original For" icon="star">
+    - Music streaming apps
+    - Entertainment platforms
+    - Youth-oriented services
+    - High-energy brands
+  </Card>
+
+  <Card title="Use Formal For" icon="briefcase">
+    - Professional audio tools
+    - B2B music services
+    - Corporate deployments
+    - Modern web applications
+  </Card>
+</CardGroup>
+
+<Warning>
+  Do not mix CSS custom properties from both themes. Each theme should be loaded independently.
+</Warning>

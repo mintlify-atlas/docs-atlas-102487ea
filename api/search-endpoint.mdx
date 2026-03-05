@@ -1,0 +1,164 @@
+---
+title: 'Search Endpoint'
+description: 'Search for songs using the MYMUSICK backend API'
+icon: 'magnifying-glass'
+---
+
+## Overview
+
+The search endpoint allows you to query the MYMUSICK backend for songs. It returns an array of song objects matching your search query.
+
+## Endpoint
+
+```
+GET https://mymusick-backend.onrender.com/search
+```
+
+## Query Parameters
+
+<ParamField query="q" type="string" required>
+  The search query string. This can be a song title, artist name, or any combination of keywords.
+</ParamField>
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://mymusick-backend.onrender.com/search?q=shape%20of%20you"
+```
+
+```javascript JavaScript (Fetch)
+const query = "shape of you";
+const response = await fetch(
+  `https://mymusick-backend.onrender.com/search?q=${encodeURIComponent(query)}`
+);
+
+if (!response.ok) {
+  throw new Error('Search request failed');
+}
+
+const songs = await response.json();
+console.log(songs);
+```
+
+```javascript JavaScript (with Error Handling)
+try {
+  const query = "shape of you";
+  const res = await fetch(
+    `https://mymusick-backend.onrender.com/search?q=${encodeURIComponent(query)}`
+  );
+
+  if (!res.ok) throw new Error('Search failed');
+
+  const songs = await res.json();
+  // Process songs array
+  songs.forEach(song => {
+    console.log(`${song.title} - ${song.artist}`);
+  });
+
+} catch (error) {
+  console.error('Error searching:', error);
+}
+```
+
+```python Python
+import requests
+from urllib.parse import urlencode
+
+query = "shape of you"
+url = f"https://mymusick-backend.onrender.com/search?{urlencode({'q': query})}"
+
+response = requests.get(url)
+
+if response.ok:
+    songs = response.json()
+    for song in songs:
+        print(f"{song['title']} - {song['artist']}")
+else:
+    print("Search request failed")
+```
+
+</CodeGroup>
+
+## Response
+
+Returns an array of song objects. See [Response Format](/api/response-format) for detailed schema documentation.
+
+### Success Response (200 OK)
+
+```json
+[
+  {
+    "id": "JGwWNGJdvx8",
+    "title": "Shape of You",
+    "artist": "Ed Sheeran",
+    "thumbnail": "https://i.ytimg.com/vi/JGwWNGJdvx8/mqdefault.jpg"
+  },
+  {
+    "id": "2Vv-BfVoq4g",
+    "title": "Perfect",
+    "artist": "Ed Sheeran",
+    "thumbnail": "https://i.ytimg.com/vi/2Vv-BfVoq4g/mqdefault.jpg"
+  }
+]
+```
+
+### Empty Results
+
+If no songs match the query, the API returns an empty array:
+
+```json
+[]
+```
+
+### Error Response
+
+If the request fails, check the HTTP status code for error details.
+
+## Implementation Notes
+
+<Note>
+  Always use `encodeURIComponent()` when building the query parameter to properly handle special characters and spaces.
+</Note>
+
+<Warning>
+  The backend is hosted on Render's free tier and may have cold start delays. The first request after inactivity may take 30-60 seconds to respond.
+</Warning>
+
+## Usage in MYMUSICK
+
+From the main application code (index.html:113-134):
+
+```javascript
+input.addEventListener("keydown", async (e) => {
+  if (e.key !== "Enter") return;
+
+  const query = input.value.trim();
+  if (!query) return;
+
+  results.innerHTML = `<p>Buscando... 🎵</p>`;
+
+  try {
+    const res = await fetch(
+      `https://mymusick-backend.onrender.com/search?q=${encodeURIComponent(query)}`
+    );
+
+    if (!res.ok) throw new Error();
+
+    const songs = await res.json();
+    renderSongs(songs);
+
+  } catch {
+    results.innerHTML = `<p>Error al buscar 😕</p>`;
+  }
+});
+```
+
+## Best Practices
+
+- **Validation**: Always validate and trim user input before making requests
+- **Encoding**: Use `encodeURIComponent()` to properly encode query parameters
+- **Error Handling**: Implement try-catch blocks to gracefully handle network errors
+- **User Feedback**: Display loading states while waiting for responses
+- **Empty States**: Handle empty result arrays appropriately in your UI
